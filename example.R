@@ -41,6 +41,13 @@ plotBarn(barn, bRot)
 
 source("tags.R")
 
+# Read data on performance tags
+tags <- read.csv("data/tags.csv", sep = ";")
+
+# removePerformanceTags
+perfTags <- ids[which(!is.na(match(ids, tags$tag_id)))]
+ids <- ids[which(is.na(match(ids, tags$tag_id)))]
+
 
 
 # # Performance tags
