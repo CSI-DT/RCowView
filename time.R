@@ -1,3 +1,5 @@
+######### Example of calculating running time for input file reading ###########
+
 file <- "C:/Downloads/FA_20200618T000000UTC.csv"
 
 

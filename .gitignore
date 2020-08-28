@@ -38,4 +38,4 @@ vignettes/*.pdf
 
 # Project-specific files
 tmp.R
-data/*.*
+data/
