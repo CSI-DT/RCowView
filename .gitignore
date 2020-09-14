@@ -36,6 +36,12 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 
+
 # Project-specific files
-tmp.R
+
+# Sandbox for experiments
+tmp.R 
+# User-specific settings
+init.R
+# Input data
 data/
