@@ -2,11 +2,12 @@
 
 library(raster)
 
+source("init.R") # Load user-specific settings, e.g. file names for analysis, etc.
 source("data.R") # Load data methods
 
 
 # Read FA data
-FAdata <- read.FAData("C:/Downloads/FA_20200618T000000UTC.csv")
+FAdata <- read.FAData(FAfile)
 
 # Print FA data dimensions
 getInfo(FAdata)
