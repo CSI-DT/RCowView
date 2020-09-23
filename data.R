@@ -74,7 +74,8 @@ read.FAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  FAdata <- vroom("C:/Downloads/FA_20200618T000000UTC.csv", delim = ",")
+  #FAdata <- vroom("C:/Downloads/FA_20200618T000000UTC.csv", delim = ",")
+  FAdata <- vroom(file, delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   colnames(FAdata) <- c("FileType", "id", "id2", "time", "x", "y", "z") 
   
