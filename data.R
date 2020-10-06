@@ -74,7 +74,6 @@ read.FAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  #FAdata <- vroom("C:/Downloads/FA_20200618T000000UTC.csv", delim = ",")
   FAdata <- vroom(file, delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   colnames(FAdata) <- c("FileType", "id", "id2", "time", "x", "y", "z") 
@@ -117,35 +116,51 @@ getTimeRange <- function(FAdata) {
 #' Rasterize points
 #' @param FAdata Dataframe with FA data
 #' @param id ID of a selected cow
-#' @param rstr Raster object that describes division into cells
+#' @param grid Raster object that describes division into cells
 #' @param bRotated Logical, if the raster is rotated
 #' @return Raster object with point counts
 #' @export
 #' 
-rasterizePoints <- function(FAdata, id, rstr = NULL, bRotated = F) {
+rasterizePoints <- function(FAdata, id, grid = NULL, bRotated = F) {
   require(raster)
   
   Ex1.ID1 <- getIndividual(FAdata, id)
   Ex1.ID1.Interval <- getInterval(Ex1.ID1, start = start, end = end)
   
-  print(range(Ex1.ID1.Interval$x))
-  print(range(Ex1.ID1.Interval$y))
+  x <- Ex1.ID1.Interval$x
+  y <- Ex1.ID1.Interval$y
   
   if (bRotated) {
     x <- Ex1.ID1.Interval$y
     y <- -Ex1.ID1.Interval$x
-  } else {
-    x <- Ex1.ID1.Interval$x
-    y <- Ex1.ID1.Interval$y
   }
   
-  if (is.null(rstr))
-    rstr <- raster(ncols = 100, nrow = 50, xmn = min(x), xmx = max(x), ymn = min(y), ymx = max(y))
-  # r <- rasterize(cbind(x, y), rstr)
-  # r <- rasterize(cbind(x, y), rstr, fun = sum)
-  r <- rasterize(cbind(x, y), rstr, fun = 'count')
+  if (is.null(grid))
+    grid <- getDrid(x, y, bRotated)
   
-  r@data@values
+  res <- rasterize(cbind(x, y), grid, fun = 'count')
   
-  return(r)
+  return(res)
+}
+
+
+#' Obtain raster grid 
+#' @param x X coordinates of points to be divided into grid (only min and max will be used)
+#' @param y Y coordinates of points to be divided into grid (only min and max will be used)
+#' @param bRotated Logical, if the raster is rotated
+#' @param nrow Number of grid rows
+#' @param ncol Number of grid columns
+#' @return Raster object with grid cells
+#' @export
+#' 
+getGrid <- function(x, y, bRotated = F, nrow = 100, ncol = 100) {
+  if (bRotated) {
+    tmp <- x
+    x <- y
+    y <- -tmp
+  }
+  
+  grid <- raster(nrows = nrow, ncols = ncol, xmn = min(x), xmx = max(x), ymn = min(y), ymx = max(y))
+  
+  return(grid)
 }
