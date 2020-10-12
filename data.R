@@ -45,11 +45,10 @@ getInterval <- function(FAdata,
 }
 
 
-#' Reads FA data as a dataframe using \code{vroom} package
+#'#' Reads FA data in \code{data.table} format
 #' 
 #' @param file Input file with location data
-#' @return Dataframe with data
-#' @examples \code{FAdata <- read.FAData(file)}
+#' @return Data in \code{data.table} format
 #' @export
 #'
 read.FADT <- function(file) {
@@ -64,19 +63,19 @@ read.FADT <- function(file) {
 }
 
 
-#' Reads FA data in \code{data.table} format
+#' Reads FA data as a dataframe using \code{vroom} package
 #' 
 #' @param file Input file with location data
-#' @return Data in \code{data.table} format
+#' @return Dataframe with data
+#' @examples \code{FAdata <- read.FAData(file)}
 #' @export
 #'
 read.FAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  FAdata <- vroom(file, delim = ",")
+  FAdata <- vroom(file, col_names = c("FileType", "id", "id2", "time", "x", "y", "z") , delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
-  colnames(FAdata) <- c("FileType", "id", "id2", "time", "x", "y", "z") 
   
   return(FAdata)
 }
@@ -163,4 +162,59 @@ getGrid <- function(x, y, bRotated = F, nrow = 100, ncol = 100) {
   grid <- raster(nrows = nrow, ncols = ncol, xmn = min(x), xmx = max(x), ymn = min(y), ymx = max(y))
   
   return(grid)
+}
+
+
+#' Reads PC data as a dataframe using \code{vroom} package
+#' 
+#' @param file Input file with location data
+#' @return Dataframe with data
+#' @examples \code{PCdata <- read.PCData(file)}
+#' @export
+#'
+read.PCData <- function(file) {
+  require(vroom)
+  
+  start <- Sys.time()
+  PCdata <- vroom(file, col_names = c("FileType", "id", "id2", "t1", "t2", "x", "y", "z"), delim = ",")
+  print(paste0("Read in ", Sys.time() - start, " seconds"))
+  
+  return(PCdata)
+}
+
+
+#' Reads PA data as a dataframe using \code{vroom} package
+#' 
+#' @param file Input file with location data
+#' @return Dataframe with data
+#' @examples \code{PAdata <- read.PAData(file)}
+#' @export
+#'
+read.PAData <- function(file) {
+  require(vroom)
+  
+  start <- Sys.time()
+  PAdata <- vroom(file, col_names = c("FileType", "id", "id2", "t1", "t2", "x", "y", "z", "activity", "dist"), delim = ",")
+  print(paste0("Read in ", Sys.time() - start, " seconds"))
+  
+  return(PAdata)
+}
+
+
+#' Reads PAA data as a dataframe using \code{vroom} package
+#' 
+#' @param file Input file with location data
+#' @return Dataframe with data
+#' @examples \code{PAAdata <- read.PAAData(file)}
+#' @export
+#'
+read.PAAData <- function(file) {
+  require(vroom)
+  
+  start <- Sys.time()
+  PAAdata <- vroom(file, col_names = c("FileType", "id", "id2", "time", "interval", "activity", "dist", "periods", "duration"), 
+                   delim = ",")
+  print(paste0("Read in ", Sys.time() - start, " seconds"))
+  
+  return(PAAdata)
 }
