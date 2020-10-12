@@ -36,10 +36,12 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 
-# Output graphs
+# Output to ignore
 *.pdf
 *.png
 *.tiff
+*.gif
+*.mp4
 
 
 # Project-specific files
