@@ -4,20 +4,25 @@
 #' @param barn Dataframe with rectangles
 #' @param bRotated Logical, if the layout should be rotated
 #' @param bAdd Logical, if the new plot should be generated
+#' @param bText Logical, if the unit names should be plotted
 #' @param ... Additional graphic parameters
 #' @export
 #' 
-plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, ...) {
+plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, bText = FALSE, ...) {
   if (!bRotated) {
     # Original layout
+    
     if (!bAdd)
       plot(c(barn$x1[1], barn$x3[1]), c(barn$y1[1], barn$y3[1]), 
            asp = 1, cex = 0, xlab = "", ylab = "", ...)
     
     rect(barn$x1, barn$y1, barn$x3, barn$y3)
-    text((barn$x1 + barn$x3) / 2, (barn$y1 + barn$y3) / 2, barn$Unit, cex= 0.5)
+    
+    if (bText)
+      text((barn$x1 + barn$x3) / 2, (barn$y1 + barn$y3) / 2, barn$Unit, cex = 0.5)
   } else {
     # Rotated layout
+    
     if (!bAdd)
       plot(c(barn$y1[1], barn$y3[1]), c(-barn$x1[1], -barn$x3[1]), 
            asp = 1, cex = 0, xlab = "", ylab = "", ...)
@@ -25,7 +30,9 @@ plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, ...) {
     rect(barn$y1, -barn$x1, barn$y3, -barn$x3) # Plot rectangles
     
     barn <- barn[-1, ] # Remove Base
-    text((barn$y1 + barn$y3) / 2, -(barn$x1 + barn$x3) / 2, barn$Unit, cex= 0.5) # Plot names
+    
+    if (bText)
+      text((barn$y1 + barn$y3) / 2, -(barn$x1 + barn$x3) / 2, barn$Unit, cex = 0.5)
   }
 }
 

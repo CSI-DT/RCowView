@@ -110,7 +110,7 @@ id <- 2427958
 
 
 # Get the grid for the whole barn
-grid <- getGrid(c(barn$x1, barn$x3), c(barn$y1, barn$y3), ncol = 50, nrow = 100, bRot)
+grid <- getGrid(c(barn$x1[1], barn$x3[1]), c(barn$y1[1], barn$y3[1]), ncol = 50, nrow = 100, bRot)
 
 pal <- adjustcolor(rev(heat.colors(100)), alpha.f = 0.8)
 pal <- adjustcolor(cm.colors(100), alpha.f = 0.6)
