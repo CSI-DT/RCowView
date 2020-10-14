@@ -7,6 +7,7 @@ Contains methods to analyse RTLS data.
 - `time.R`: example comparing running time to read input files
 - `data.R`: data manipulation methods
 - `plot.R`: plotting methods
+- `cows.R`: methods to work with data on cows
 - `tmp.R`: sandbox for your own methods (not synced on GitHub)
 
 Make sure that you have all the necessary data files (e.g. `barn.csv`, `tags.csv`) in the `data` folder (not synced on GitHub).

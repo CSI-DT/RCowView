@@ -11,3 +11,5 @@ FAfile <- "C:/Downloads/CowData/FA_20191116T000000UTC.csv"
 PCfile <- "C:/Downloads/CowData/PC_20191116T000000UTC.csv"
 PAfile <- "C:/Downloads/CowData/PA_20191116T000000UTC.csv"
 PAAfile <- "C:/Downloads/CowData/PAA_20191116T000000UTC.csv"
+
+CowsTagsFile <- "C:/Downloads/KO info 200914.csv"
