@@ -1,5 +1,7 @@
 ######### Functions to read, clean and manipulate data ###########
 
+library(raster)
+
 #' Function to extract data from one individual
 #' @param FAdata Dataframe with FA data
 #' @param cowID ID of selected cow
@@ -57,7 +59,7 @@ read.FADT <- function(file) {
   start <- Sys.time()
   FAdata <- fread(file)
   print(paste0("Read in ", Sys.time() - start, " seconds"))
-  colnames(FAdata) <- c("FileType", "id", "id2", "time", "x", "y", "z") 
+  colnames(FAdata) <- c("FileType", "id", "tag", "time", "x", "y", "z") 
   
   return(FAdata)
 }
@@ -74,7 +76,7 @@ read.FAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  FAdata <- vroom(file, col_names = c("FileType", "id", "id2", "time", "x", "y", "z") , delim = ",")
+  FAdata <- vroom(file, col_names = c("FileType", "id", "tag", "time", "x", "y", "z") , delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   
   return(FAdata)
@@ -176,7 +178,7 @@ read.PCData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  PCdata <- vroom(file, col_names = c("FileType", "id", "id2", "t1", "t2", "x", "y", "z"), delim = ",")
+  PCdata <- vroom(file, col_names = c("FileType", "id", "tag", "t1", "t2", "x", "y", "z"), delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   
   return(PCdata)
@@ -194,7 +196,7 @@ read.PAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  PAdata <- vroom(file, col_names = c("FileType", "id", "id2", "t1", "t2", "x", "y", "z", "activity", "dist"), delim = ",")
+  PAdata <- vroom(file, col_names = c("FileType", "id", "tag", "t1", "t2", "x", "y", "z", "activity", "dist"), delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   
   return(PAdata)
@@ -212,7 +214,7 @@ read.PAAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  PAAdata <- vroom(file, col_names = c("FileType", "id", "id2", "time", "interval", "activity", "dist", "periods", "duration"), 
+  PAAdata <- vroom(file, col_names = c("FileType", "id", "tag", "time", "interval", "activity", "dist", "periods", "duration"), 
                    delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   
