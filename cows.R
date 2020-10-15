@@ -15,16 +15,19 @@ readCowData <- function(KoInfoFile) {
   
   koData <- read.table(KoInfoFile, skip = start + 1, fill = T, header = T, nrows = end - start - 3, stringsAsFactors = F)
   
-  koData <- koData[-grep("%%", koData$KO), ] # remove comments that start with %%
+  # remove comments that start with %%
+  if (length(grep("%%", koData$KO)) > 0)
+    koData <- koData[-grep("%%", koData$KO), ] 
   
   sel <- which(koData$RESP == 0)
-  
-  # Update lines with SKAUT, SINLD, etc.
-  x <- koData[sel, ]
-  for (i in ncol(x):2)
-    x[, i] <- x[, i - 1]
-  x$RESP <- 0
-  koData[sel, ] <- x
+  if (length(sel) > 0) {
+    # Update lines with SKAUT, SINLD, etc.
+    x <- koData[sel, ]
+    for (i in ncol(x):2)
+      x[, i] <- x[, i - 1]
+    x$RESP <- 0
+    koData[sel, ] <- x
+  }
   
   koData$TAG <- toupper(koData$TAG) # Use only capital letters in tag id
   koData$KALVN <- as.Date(koData$KALVN, format = "%d-%m-%y") # Dates
@@ -42,10 +45,12 @@ readCowData <- function(KoInfoFile) {
   dryData <- dryData[-nrow(dryData), ] # Remove last line
   
   sel <- which(dryData$DryDate == 0)
-  x <- dryData[sel, ]
-  for (i in ncol(x):5)
-    x[, i] <- x[, i - 1]
-  dryData[sel, ] <- x
+  if (length(sel) > 0) {
+    x <- dryData[sel, ]
+    for (i in ncol(x):5)
+      x[, i] <- x[, i - 1]
+    dryData[sel, ] <- x
+  }
   
   # TODO: fix dryData (some rows are divided in a weird way)
   
