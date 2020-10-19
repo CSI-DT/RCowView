@@ -47,8 +47,11 @@ vignettes/*.pdf
 # Project-specific files
 
 # Sandbox for experiments
-tmp.R 
+tmp.R
+*-*.R
+
 # User-specific settings
 init.R
+
 # Input data
 data/
