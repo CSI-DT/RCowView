@@ -4,7 +4,9 @@ Contains methods to analyse RTLS data.
 
 
 - `cows.R`: methods to work with data on cows
+- `analysis.R`: analysis methods
 - `data.R`: data manipulation methods
+- `database.R`: database methods
 - `example.R`: example code to read, process and visualise data
 - `init.R`: specified paths for input files and other user-specific settings here (not synced on GitHub)
 - `plot.R`: plotting methods
