@@ -66,3 +66,27 @@ addPoints <- function(FAdata, id, color, bRotated = F, ...) {
     )
   }
 }
+
+
+
+# factor is used to get average, we just multiply values for each raster by the factor. maxHours is not affected
+makeCubiclePlot <- function(hml, maxHours = 0, factor = 1, ...) {
+  if (maxHours == 0) {
+    for (i in 1:length(hml))
+      if (class(hml[[i]]) == "RasterLayer")
+        maxHours <- max(maxHours, hml[[i]]@data@values * factor)
+  }
+  
+  plotBarn(barn, axes = F, ...)
+  
+  bLegend <- TRUE
+  
+  for (i in 1:length(hml))
+    if (class(hml[[i]]) == "RasterLayer") { # Do not plot anything if raster is empty
+      plot(hml[[i]] * factor, zlim = c(0, maxHours), add = T, 
+           legend = ifelse(bLegend, T, F), 
+           legend.width = 3, legend.shrink = 0.75,
+           legend.args = list(text  ='Hours', side = 3, line = 0.5, cex = 1))
+      bLegend <- FALSE
+    }
+}
