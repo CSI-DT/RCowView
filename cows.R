@@ -34,6 +34,12 @@ readCowData <- function(KoInfoFile) {
   
   colnames(koData) <- c("Cow", "RESP", "Tag", "GR", "Status", "Lactation", "CalvingDate", "DIM")
   
+  # Remove line with cow "100%"
+  # TODO: fix this
+  if (length(grep("%", koData$Cow)) > 0)
+    koData <- koData[-grep("%", koData$Cow), ] 
+  
+  
   
   # Select second table
   start <- grep("-----KO---", lines, fixed = TRUE)
@@ -59,20 +65,7 @@ readCowData <- function(KoInfoFile) {
 
 
 
-
-
-# Example: read cow data
-
-res <- readCowData(KoInfoFile)
-cowData <- res[[1]]
-dryData <- res[[2]]
-
-
-
-
-# Example: matching PAA data with cow data by id
-
-getTagID <- function(data, id, cowData) {
+getCowID <- function(data, id, cowData) {
   sel <- which(data$id == id)
   tag <- toupper(data$tag[sel[1]])
   
@@ -81,7 +74,35 @@ getTagID <- function(data, id, cowData) {
   return(sel)
 }
 
-PAAdata <- read.PAAData(PAAfile)
-id <- 2427958
-i <- getTagID(PAAdata, id, cowData)
-print(cowData[i, ])
+
+
+getTagID <- function(data, tagID, cowData) {
+  sel <- which(data$tag == tagID)
+  tag <- toupper(data$tag[sel[1]])
+  
+  sel <- which(cowData$Tag == tag)
+  
+  return(sel)
+}
+
+
+
+if (FALSE) {
+  
+  
+  # Example: read cow data
+  
+  res <- readCowData(KoInfoFile)
+  cowData <- res[[1]]
+  dryData <- res[[2]]
+  
+  
+  
+  
+  # Example: matching PAA data with cow data by id
+  
+  PAAdata <- read.PAAData(PAAfile)
+  id <- 2427958
+  i <- getTagID(PAAdata, id, cowData)
+  print(cowData[i, ])
+}
