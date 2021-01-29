@@ -1,10 +1,9 @@
 ######### Examples of using methods from this package ###########
 
-library(raster)
 
 source("init.R") # Load user-specific settings, e.g. file names for analysis, etc.
 source("data.R") # Load data methods
-
+source("plot.R") # Load plot methods
 
 # Read FA data
 FAdata <- read.FAData(FAfile)
@@ -21,7 +20,7 @@ data <- apply(FAdata[, c(2, 4, 5, 6)], 2, as.numeric) # Keep essential columns (
 ids <- sort(unique(FAdata$id)) # Get tag IDs
 
 
-source("plot.R") # Load plot methods
+
 
 # Read data on barn layout
 barn <- read.csv("data/barn.csv", sep = ";")

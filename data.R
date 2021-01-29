@@ -1,7 +1,5 @@
 ######### Functions to read, clean and manipulate data ###########
 
-library(raster)
-
 #' Function to extract data from one individual
 #' @param FAdata Dataframe with FA data
 #' @param cowID ID of selected cow
@@ -155,6 +153,8 @@ rasterizePoints <- function(FAdata, id, grid = NULL, bRotated = F) {
 #' @export
 #' 
 getGrid <- function(x, y, bRotated = F, nrow = 100, ncol = 100) {
+  require(raster)
+  
   if (bRotated) {
     tmp <- x
     x <- y
