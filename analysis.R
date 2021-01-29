@@ -27,7 +27,7 @@ getMeanPos <- function(PAdata) {
 
 getMeanPosTag <- function(PAdata) {
   tags <- sort(unique(PAdata$tag)) # Get tag IDs
-  meanPos <- data.frame(tag = tags, x = rep(NA, length(ids)), y = rep(NA, length(ids)), t = rep(NA, length(ids)))
+  meanPos <- data.frame(tag = tags, x = rep(NA, length(tags)), y = rep(NA, length(tags)), t = rep(NA, length(tags)))
   
   for (tag in tags) {
     data <- PAdata[which(PAdata$tag == tag), ]
@@ -54,18 +54,23 @@ getMeanPosTag <- function(PAdata) {
 # Cubicle usage heatmap
 # selectedTagIDs - selected tag IDs, e.g. those in first lactation
 # maxHours <- 0 # Maximum time spent in any cubicle (in hours)
-getCubicleUsageHeatmap <- function(data, selectedTagIDs, title = "", maxHours = 0, bPlot = TRUE) {
+getCubicleUsageHeatmap <- function(data, selectedTagIDs, 
+                                   units = c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6"),
+                                   rows = rep(16, 6),
+                                   cols = rep(2, 6),
+                                   title = "", maxHours = 0, bPlot = TRUE) {
   require(raster)
   
   bRot <- F
   hmList <- list() # List of rasters for heatmaps
   
   # Prepare rasters for each bed
-  for (unit in c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6")) {
+  for (uIndex in 1:length(units)) {
+    unit <- units[uIndex]
     cat(unit)
     
     sel <- which(barn$Unit == unit)
-    grid <- getGrid(c(barn$x1[sel], barn$x3[sel]), c(barn$y1[sel], barn$y3[sel]), nrow = 16, ncol = 2, bRot)
+    grid <- getGrid(c(barn$x1[sel], barn$x3[sel]), c(barn$y1[sel], barn$y3[sel]), nrow = rows[uIndex], ncol = cols[uIndex], bRot)
     
     bedLayer <- 0
     for (tag in selectedTagIDs) {
@@ -95,7 +100,7 @@ getCubicleUsageHeatmap <- function(data, selectedTagIDs, title = "", maxHours = 
   cat("Done!\n")
   
   # Make a summary plot
-  if (bPlot) {
+  if (bPlot & length(units) == 6) {
     opar <- par(mfrow = c(2, 3))
     for (i in c(2,4,6, 1,3,5)) {
       plot(hmList[[i]], zlim = c(0, maxHours), 
