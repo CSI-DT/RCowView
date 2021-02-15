@@ -8,6 +8,7 @@ Contains methods to analyse RTLS data.
 - `data.R`: data manipulation methods
 - `database.R`: database methods
 - `example.R`: example code to read, process and visualise data
+- `farmXXX.R`: farm-specific methods (each farm should have a separate file)
 - `init.R`: specified paths for input files and other user-specific settings here (not synced on GitHub)
 - `plot.R`: plotting methods
 - `time.R`: example comparing running time to read input files
