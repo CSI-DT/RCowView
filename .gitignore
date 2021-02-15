@@ -42,6 +42,7 @@ vignettes/*.pdf
 *.tiff
 *.gif
 *.mp4
+*.rds
 
 
 # Project-specific files
