@@ -220,3 +220,13 @@ read.PAAData <- function(file) {
   
   return(PAAdata)
 }
+
+
+#' Abstract function: to be defined for a particular farm. Reads barn data from file.
+#' @param file Filename of the file with barn data
+#' @return Dataframe with rectangles
+#' @export
+#' 
+readBarnData <- function(file) {
+  stop(paste0("This function (", "readBarnData", ") needs to be overriden with farm-specific routines."))
+}
