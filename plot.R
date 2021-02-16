@@ -1,5 +1,6 @@
 ######### Functions to plot data ###########
 
+
 #' Plot the barn layout
 #' @param barn Dataframe with rectangles
 #' @param bRotated Logical, if the layout should be rotated
@@ -16,7 +17,9 @@ plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, bText = FALSE, ...) {
       plot(c(barn$x1[1], barn$x3[1]), c(barn$y1[1], barn$y3[1]), 
            asp = 1, cex = 0, xlab = "", ylab = "", ...)
     
-    rect(barn$x1, barn$y1, barn$x3, barn$y3)
+    rect(barn$x1[1], barn$y1[1], barn$x3[1], barn$y3[1], col = "gray90") # Base
+    
+    rect(barn$x1[-1], barn$y1[-1], barn$x3[-1], barn$y3[-1]) #  Units
     
     if (bText)
       text((barn$x1 + barn$x3) / 2, (barn$y1 + barn$y3) / 2, barn$Unit, cex = 0.5)
@@ -68,25 +71,40 @@ addPoints <- function(FAdata, id, color, bRotated = F, ...) {
 }
 
 
-
-# factor is used to get average, we just multiply values for each raster by the factor. maxHours is not affected
-makeCubiclePlot <- function(hml, maxHours = 0, factor = 1, ...) {
-  if (maxHours == 0) {
+#' Add cubicle heatmaps to the barn plot (should be called separately)
+#' @param hml List of RasterLayers
+#' @param maxHours Logical, if the layout should be rotated
+#' @param factor Is used to get average time by multiplying values for each raster by the factor (maxHours is not affected)
+#' @param legendText Text for the legend
+#' @param ... Additional graphic parameters
+#' @export
+#'
+addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Average hours per day", ...) {
+  if (maxHours == 0) { #  Define maxHours if it is undefined
     for (i in 1:length(hml))
       if (class(hml[[i]]) == "RasterLayer")
         maxHours <- max(maxHours, hml[[i]]@data@values * factor)
   }
   
-  plotBarn(barn, axes = F, ...)
   
-  bLegend <- TRUE
-  
+  bLegend <- TRUE # Used to plot the legend only once
   for (i in 1:length(hml))
     if (class(hml[[i]]) == "RasterLayer") { # Do not plot anything if raster is empty
       plot(hml[[i]] * factor, zlim = c(0, maxHours), add = T, 
            legend = ifelse(bLegend, T, F), 
-           legend.width = 3, legend.shrink = 0.75,
-           legend.args = list(text  ='Hours', side = 3, line = 0.5, cex = 1))
+           # legend.width = 1, legend.shrink = 0.4,
+           smallplot = c(0.8, .85, .3, .75),
+           legend.args = list(text = legendText, side = 4, line = 2.5, cex = 1))
       bLegend <- FALSE
     }
+}
+
+
+#' Abstract function: to be defined for a particular farm. Adds graphic features to the barn plot.
+#' @param barn Dataframe with rectangles
+#' @param ... Additional graphic parameters
+#' @export
+#' 
+addBarnFeatures <- function(barn, ...) {
+  stop(paste0("This function (", "addBarnFeatures", ") needs to be overriden with farm-specific routines."))
 }
