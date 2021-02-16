@@ -5,6 +5,15 @@ source("init.R") # Load user-specific settings, e.g. file names for analysis, et
 source("data.R") # Load data methods
 source("plot.R") # Load plot methods
 
+
+source("farmLad.R") # Farm-specific functions
+
+# Read data on barn layout
+barn <- readBarnData("data/barn.csv")
+
+
+
+
 # Read FA data
 FAdata <- read.FAData(FAfile)
 
@@ -22,8 +31,6 @@ ids <- sort(unique(FAdata$id)) # Get tag IDs
 
 
 
-# Read data on barn layout
-barn <- read.csv("data/barn.csv", sep = ";")
 
 # Choose if the layout should be rotated or not
 bRot <- T
@@ -98,6 +105,26 @@ if (FALSE) {
   # dev.off()
 }
 # End of excluded code
+
+
+
+
+if (FALSE) {
+  # Example: read cow data
+  
+  res <- readCowData(KoInfoFile)
+  cowData <- res[[1]]
+  dryData <- res[[2]]
+  
+  # Example: matching PAA data with cow data by id
+  
+  PAAdata <- read.PAAData(PAAfile)
+  id <- 2427958
+  i <- getTagID(PAAdata, id, cowData)
+  print(cowData[i, ])
+}
+
+
 
 
 
