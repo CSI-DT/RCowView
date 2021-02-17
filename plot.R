@@ -86,6 +86,10 @@ addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Avera
         maxHours <- max(maxHours, hml[[i]]@data@values * factor)
   }
   
+  for (i in 1:length(hml))
+    if (class(hml[[i]]) == "RasterLayer")
+      if (maxHours < max(hml[[i]]@data@values * factor))
+        message(paste0("Warning: current maxHours variable is too low, increase it above ", max(hml[[i]]@data@values * factor)))
   
   bLegend <- TRUE # Used to plot the legend only once
   for (i in 1:length(hml))
