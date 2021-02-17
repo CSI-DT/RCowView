@@ -272,3 +272,23 @@ getCowID <- function(tag, date, cowTagMap) {
   
   return(NA)
 }
+
+
+#' Abstract function: to be defined for a particular farm. Reads PA data for all tags on a particular day.
+#' @param date Selected date
+#' @return Dataframe with PA data on a particular day
+#' @export
+#' 
+getDailyDataPA <- function(date) {
+  stop(paste0("This function (", "getDailyDataPA", ") needs to be overriden with farm-specific routines."))
+}
+
+
+#' Abstract function: to be defined for a particular farm. Create a dataframe with areas for analysis
+#' @param barn Dataframe with barn data
+#' @return Dataframe with data on areas: Unit, coordinates, NumCub (number of cubicles in each area)
+#' @export
+#' 
+prepareAreas <- function(barn) {
+  stop(paste0("This function (", "prepareAreas", ") needs to be overriden with farm-specific routines."))
+}
