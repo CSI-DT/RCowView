@@ -160,3 +160,50 @@ subsetTags <- function(tags, cowData, lactRange = c(0, 30), dimRange = c(0, 9999
   
   return(data$Tag)
 }
+
+
+#' Calculate time spent in-cubicle in each of the selected areas by selected tags
+#' @param data Dataframe with PA data
+#' @param selectedTagIDS Selected tags 
+#' @param areas Dataframe with data on areas
+#' @return Dataframe with area usage data by cow
+#' @export
+#' 
+getAreaUsageData <- function(data, selectedTagIDs, areas) {
+  usageData <- data.frame(tag = selectedTagIDs, stringsAsFactors = FALSE) # Resulting data frame
+  
+  units <- areas$Unit
+  
+  for (unit in units)
+    usageData[, unit] <- integer(length(selectedTagIDs))
+  
+  cat("Iterating over tags...")
+  
+  for (tag in selectedTagIDs) {
+    
+    i <- which(data$tag == tag)
+    if (length(i) == 0)
+      next
+    
+    row <- which(selectedTagIDs == tag)
+    
+    df <- data.frame(x = data$x[i], y = data$y[i], t = (data$t2[i] - data$t1[i]) / 1000 / 60 / 60)
+    
+    for (uIndex in 1:length(units)) {
+      unit <- units[uIndex]
+      
+      sel <- which(areas$Unit == unit)
+      
+      unitTime <- sum(df$t[which(df$x > areas$x1[sel] & df$x < areas$x3[sel] & df$y > areas$y1[sel] & df$y < areas$y3[sel])])
+      
+      unitTime <- unitTime / areas$NumCub[sel] # Adjust by the number of cubicles
+      
+      usageData[row, uIndex + 1] <- unitTime
+    }
+    
+    cat(".")
+  }
+  cat("Done!\n")
+  
+  return(usageData)
+}
