@@ -234,9 +234,41 @@ readBarnData <- function(file) {
 
 #' Abstract function: to be defined for a particular farm. Reads cow data from file.
 #' @param file Filename of the file with cow data
-#' @return Dataframe with cow data
+#' @return Dataframe with cow data: CowID, Lactation, CalvingDate
 #' @export
 #' 
 readCowData <- function(file) {
   stop(paste0("This function (", "readCowData", ") needs to be overriden with farm-specific routines."))
+}
+
+
+#' Abstract function: to be defined for a particular farm. Reads cow-tag mapping data from file.
+#' @param file Filename of the file with cow-tag mapping data
+#' @return Dataframe with cow-tag mapping data: CowID, Tag, From
+#' @export
+#' 
+readCowTagMap <- function(file) {
+  stop(paste0("This function (", "readCowTagMap", ") needs to be overriden with farm-specific routines."))
+}
+
+
+
+#' Get ID of a cow associated with a selected tag on a particular date
+#' @param tag Tag ID
+#' @param date Date of interest
+#' @param cowTagMap Cow-tag mapping data with CowID, Tag, From
+#' @return CowID corresponding to the selected tag
+#' @export
+#' 
+getCowID <- function(tag, date, cowTagMap) {
+  sel <- which(cowTagMap$Tag == tag)
+  
+  if (length(sel) == 0)
+    return(NA)
+  
+  for (i in 1:length(sel))
+    if (date >= as.Date(cowTagMap$From[sel[i]])) # Return the earliest fromDate that is later than the date of interest
+      return(cowTagMap$CowID[sel[i]])
+  
+  return(NA)
 }
