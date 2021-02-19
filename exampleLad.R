@@ -9,7 +9,7 @@ source("plot.R") # Load plot methods
 source("farmLad.R") # Farm-specific functions
 
 # Read data on barn layout
-barn <- readBarnData("data/barn.csv")
+barn <- readBarnData("data/barn_Lad.csv")
 
 
 
@@ -44,7 +44,7 @@ addPoints(FAdata, ids[15], "red", bRot)
 
 
 # Read data on performance tags
-tags <- read.csv("data/tags.csv", sep = ";")
+tags <- read.csv("data/performanceTags_Lad.csv", sep = ";")
 
 # Remove performance tags
 perfTags <- ids[which(!is.na(match(ids, tags$tag_id)))]

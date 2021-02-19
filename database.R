@@ -17,9 +17,11 @@ populateDB <- function(DBFileName, files, tableName = "PAdata", FUN = read.PADat
   dbDisconnect(con)
 }
 
+
+# TODO: maybe get rid of this function?
 filterTags <- function(data) {
   # Read data on performance tags
-  tags <- read.csv("data/tags.csv", sep = ";")
+  tags <- read.csv(paste0("data/performanceTags_", farmName, ".csv"), sep = ";")
   
   ids <- sort(unique(data$id)) # Get tag IDs
   
@@ -103,7 +105,9 @@ getTagIDs <- function(DBFileName, date) {
   return(tags)
 }
 
-getActiveTagIDs <- function(DBFileName, date, areaThreshold = 5000000, cacheFile = NULL) {
+
+# TODO: obsolete method. Part of cache functionality is implemented elsewhere.
+getActiveTagIDsDB <- function(DBFileName, date, areaThreshold = 5000000, cacheFile = NULL) {
   if (!is.null(cacheFile)) {
     # Open or create new cache file
     if (file.exists(cacheFile)) cachedActiveTags <- readRDS(cacheFile) else 
