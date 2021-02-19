@@ -266,11 +266,20 @@ getCowID <- function(tag, date, cowTagMap) {
   if (length(sel) == 0)
     return(NA)
   
-  for (i in 1:length(sel))
-    if (date >= as.Date(cowTagMap$From[sel[i]])) # Return the earliest fromDate that is later than the date of interest
-      return(cowTagMap$CowID[sel[i]])
+  res <- NA
+  since <- 2000 # Limit for time since tag attachment
+  for (i in 1:length(sel)) {
+    if (as.Date(cowTagMap$From[sel[i]]) <= date) # Return the earliest fromDate that is later than the date of interest
+      if (as.integer(date - as.Date(cowTagMap$From[sel[i]])) < since) {
+        since <- as.integer(date - as.Date(cowTagMap$From[sel[i]]))
+        res <- cowTagMap$CowID[sel[i]]
+      }
+  }
   
-  return(NA)
+  if (since > 7)
+    message(paste0("Suspicious records: ", ifelse(since > 600, "> 600", since), " days since tag attachment for tag ", tag))
+  
+  return(res)
 }
 
 
@@ -291,4 +300,52 @@ getDailyDataPA <- function(date) {
 #' 
 prepareAreas <- function(barn) {
   stop(paste0("This function (", "prepareAreas", ") needs to be overriden with farm-specific routines."))
+}
+
+
+#' Get active tags for a specific day
+#' @param data PA data for the day of interest
+#' @param date Date of interest
+#' @param areaThreshold Threshold to identify active/inactive tags based on bounding rectangular of all points
+#' @param cacheFile Cache file with saved active tags
+#' @return Vector of tags that move substantially for the specific day
+#' @export
+#' 
+getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL) {
+  if (!is.null(cacheFile)) {
+    # Open or create new cache file
+    if (file.exists(cacheFile)) cachedActiveTags <- readRDS(cacheFile) else 
+      cachedActiveTags <- new.env(hash = T, parent = emptyenv())
+    
+    # Store active tags
+    dateStr <- as.character(date)
+    if (dateStr %in% ls(cachedActiveTags)) {
+      cat("Loading cached active tags... ")
+      activeTags <- cachedActiveTags[[dateStr]]
+      cat("Done!\n")
+      return(activeTags)
+    }
+  }
+  
+  tags <- sort(unique(data$tag))
+  
+  activeTags <- c()
+  for (tagID in tags) {
+    area <- (max(data$x) - min(data$x)) * (max(data$y) - min(data$y))
+    
+    if (area > areaThreshold) {
+      activeTags <- c(activeTags, tagID)
+      cat(tagID, ", ")
+    } else
+      cat("\n", tagID, " : inactive\n")
+  }
+  
+  if (!is.null(cacheFile)) {
+    cachedActiveTags[[dateStr]] <- activeTags
+    
+    # Save updated cache of active tags
+    saveRDS(cachedActiveTags, cacheFile)
+  }
+  
+  return(activeTags)
 }
