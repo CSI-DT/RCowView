@@ -207,3 +207,102 @@ getAreaUsageData <- function(data, selectedTagIDs, areas) {
   
   return(usageData)
 }
+
+
+#' Calculate and save area usage data to file
+#' @details Tags that could not be matched to the corresponding cow data are saved in another file
+#' @param startDate Start date
+#' @param endDate End date
+#' @export
+#' 
+saveAreaUsageDataToFile <- function(startDate, endDate) {
+  dates <- as.Date(as.Date(startDate):as.Date(endDate), origin = "1970-01-01")
+  
+  totalUsageData <- data.frame()
+  
+  naTags <- c()
+  naDays <- c()
+  
+  for (d in 1:length(dates)) {
+    date <- dates[d]
+    
+    print(date)
+    
+    data <- getDailyDataPA(date)
+    
+    tags <- unique(data$tag)
+    tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
+    
+    tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds")) # Keep only active tags
+    
+    dailyUsageData <- getAreaUsageData(data, tags, areas)
+    
+    dailyUsageData <- dailyUsageData[which(rowSums(dailyUsageData[, -1]) > 0), ] # Remove zero-usage tags
+    
+    
+    # matching <- match(dailyUsageData$tag, cowData$Tag) #  Old version for Lad
+    
+    cowIDs <- sapply(dailyUsageData$tag, function(t) getCowID(t, date, cowTagMap))
+    matching <- match(cowIDs, cowData$CowID)
+    
+    matching <- rep(NA, length(cowIDs))
+    for (i in 1:length(cowIDs)) {
+      id <- cowIDs[i]
+      sel <- which(cowData$CowID == id)
+      
+      if (length(sel) == 1)
+        matching[i] <- sel
+      if (length(sel) > 1) {
+        sinceCalv <- as.integer(date - cowData$CalvingDate[sel]) # Days since calving for each lactation
+        sinceCalv[which(sinceCalv < 0)] <- 1000 # Discard negative values
+        matching[i] <- sel[which.min(sinceCalv)]
+      }
+    }
+    
+    
+    dailyUsageData$Cow <- cowData$CowID[matching]
+    dailyUsageData$Lactation <- cowData$Lactation[matching]
+    dailyUsageData$CalvingDate <- cowData$CalvingDate[matching]
+    
+    
+    if (length(which(is.na(matching))) > 0) {
+      message(paste0(length(which(is.na(matching))), " non-matched tags:"))
+      message(paste(dailyUsageData$tag[which(is.na(matching))], collapse = ", "))
+    }
+    
+    naTags <- c(naTags, dailyUsageData$tag[which(is.na(matching))])
+    naDays <- c(naDays, rep(date, length(which(is.na(matching)))))
+    
+    dailyUsageData <- dailyUsageData[which(!is.na(dailyUsageData$Cow)), -1]
+    
+    if (nrow(totalUsageData) == 0) {
+      totalUsageData <- dailyUsageData
+      totalUsageData$days <- rep(1, nrow(totalUsageData))
+    } else {
+      m1 <- match(dailyUsageData$Cow, totalUsageData$Cow)
+      for (i in 1:length(m1)) {
+        if (!is.na(m1[i])) {
+          totalUsageData[m1[i], 1:nrow(areas)] <- totalUsageData[m1[i], 1:nrow(areas)] + dailyUsageData[i, 1:nrow(areas)]
+          totalUsageData$days[m1[i]] <- totalUsageData$days[m1[i]] + 1
+        }
+      }
+      
+      m2 <- match(totalUsageData$Cow, dailyUsageData$Cow)
+      dailyUsageData$days <- rep(1, nrow(dailyUsageData)) # Add number of days
+      newCows <- which(is.na(m2))
+      totalUsageData <- rbind(totalUsageData, dailyUsageData[newCows, ])
+    }
+  }
+  
+  
+  print(head(totalUsageData))
+  
+  
+  write.table(totalUsageData, 
+              paste0("../graphs/", "areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), 
+              row.names = F, sep  = ";")
+  
+  write.table(data.frame(MissingTags = naTags, Day = as.Date(naDays, origin = "1970-01-01")), 
+              paste0("../graphs/", "non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), 
+              row.names = F, sep  = ";")
+}
