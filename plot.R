@@ -154,3 +154,24 @@ plotCubicleUsageHeatmap <- function(startDate, endDate, units, rows, cols, ...) 
   addCubicleHeatmap(sumHML, factor = 1 / length(dates), ...)
   addBarnFeatures(barn)
 }
+
+
+
+addColorBandLegend <- function(title = "", colors = hcl.colors(12, "YlOrRd", rev = TRUE), k = 100, 
+                               lwd = 7,
+                               pos = c(0, 0), length = 10, range = c(0, 1), offsets = c(1, 1), ...) {
+  palette <- colorRampPalette(colors)
+  palette <- palette(k)
+  
+  for (i in 1:(k + 1))
+    lines(seq(pos[1] - length / 2, pos[1] + length / 2, by = length / k)[c(i, i+1)], 
+          rep(pos[2], k + 1)[c(i, i + 1)], 
+          col = palette[i], lend = "butt", lwd = lwd, ...)
+  
+  text(pos[1] - length / 2, pos[2] - offsets[1], signif(range[1], 3), adj = 0.5, ...)
+  # text(pos[1], pos[2] - offsets[1], signif(floor((range[1] + range[2]) / 2), 3), adj = 0.5, ...)
+  text(pos[1], pos[2] - offsets[1], signif((range[1] + range[2]) / 2, 3), adj = 0.5, ...)
+  text(pos[1] + length / 2, pos[2] - offsets[1], signif(range[2], 3), adj = 0.5, ...)
+  
+  text(pos[1], pos[2] + offsets[2], title, ...)
+}
