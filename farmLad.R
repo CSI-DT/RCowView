@@ -1,9 +1,14 @@
 ######### Farm-specific functions for Lad farm ###########
 
-farmName <- "Lad"
-
 
 source("database.R") # Needed for getData function used in getDailyDataPA
+
+farmName <- "Lad"
+
+# Internally used variables
+KO_folder <- paste0(dataFolder, "/CowDataLad/KO info")
+DBFileName <- paste0(dataFolder, "/CowDataLad/PA2020.db")
+
 
 addBarnFeatures <- function(barn) {
   mid <- (barn$x3[which(barn$Unit == "bed3")] + barn$x1[which(barn$Unit == "bed3")]) / 2
@@ -112,7 +117,6 @@ readKoInfo <- function(KoInfoFile) {
 
 
 readCowData <- function() {
-  KO_folder <- "C:/Data/CowDataLad/KO info"
   KO_files <- list.files(KO_folder)
   KO_dates <- as.Date(substring(KO_files, 9, 14), "%y%m%d")
   
@@ -141,7 +145,6 @@ readCowData <- function() {
 
 
 readCowTagMap <- function() {
-  KO_folder <- "C:/Data/CowDataLad/KO info"
   KO_files <- list.files(KO_folder)
   KO_dates <- as.Date(substring(KO_files, 9, 14), "%y%m%d")
   
@@ -186,7 +189,7 @@ readCowTagMap <- function() {
 
 
 getDailyDataPA <- function(date) {
-  data <- getData("C:/Data/CowDataLad/PA2020.db", date)
+  data <- getData(DBFileName, date)
   return(data)
 }
 

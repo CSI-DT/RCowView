@@ -1,5 +1,6 @@
 ######### Farm-specific functions for Wim farm ###########
 
+
 farmName <- "Wim"
 
 addBarnFeatures <- function(barn) {
@@ -93,7 +94,7 @@ readCowTagMap <- function() {
 
 
 getDailyDataPA <- function(date) {
-  data <- read.PAData(paste0("C:/Data/CowDataWim/PA_", as.character(as.Date(date, origin = "1970-01-01"), format = "%Y%m%d"), "T000000UTC.csv"))
+  data <- read.PAData(paste0(dataFolder, "/CowDataWim/PA_", as.character(as.Date(date, origin = "1970-01-01"), format = "%Y%m%d"), "T000000UTC.csv"))
   return(data)
 }
 
