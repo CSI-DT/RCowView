@@ -299,10 +299,10 @@ saveAreaUsageDataToFile <- function(startDate, endDate) {
   
   
   write.table(totalUsageData, 
-              paste0("../graphs/", "areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), 
+              paste0(outputFolder, "areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), 
               row.names = F, sep  = ";")
   
   write.table(data.frame(MissingTags = naTags, Day = as.Date(naDays, origin = "1970-01-01")), 
-              paste0("../graphs/", "non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), 
+              paste0(outputFolder, "non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), 
               row.names = F, sep  = ";")
 }
