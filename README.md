@@ -1,16 +1,27 @@
 # RCowView
- 
-Contains methods to analyse RTLS data.
 
+R implementation of methods dealing with real-time location system (RTLS) data from GEA CowView
+
+Core methods to analyse RTLS data:
 - `analysis.R`: analysis methods
 - `data.R`: data manipulation methods
 - `database.R`: database methods
-- `exampleXXX.R`: example code to read, process and visualise data
+- `plot.R`: plotting methods
+
+
+User- or farm-specific files:
 - `farmXXX.R`: farm-specific methods (each farm should have a separate file)
 - `init.R`: specified paths for input files and other user-specific settings here (not synced on GitHub)
-- `plot.R`: plotting methods
-- `time.R`: example comparing running time to read input files
+- `initExample.R`: example of `init.R`
 - `tmp.R`: sandbox for your own methods (not synced on GitHub)
+
+
+Examples and analysis source code files start with `run`:
+- `runAreaUsageAnalysis.R`: analysis of area usage data
+- `runExampleXXX.R`: example code to read, process and visualise data for specific farm
+- `runReadTime.R`: code to compare running time to read input files
+- ...
+
 
 
 ## Ignored files
