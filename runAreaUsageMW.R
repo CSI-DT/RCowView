@@ -89,7 +89,7 @@ testMW <- function(data, i, j, selGroup) {
   }
 }
 
-pdf(paste0(outputFolder, "diffAreas ", "allCows ", farmName, ".pdf"))
+pdf(paste0(outputFolder, "/diffAreas ", "allCows ", farmName, ".pdf"))
 
 sel <- 1:nrow(data)
 
@@ -149,12 +149,12 @@ for (i in 1:numUnits)
     mat[i, j] <- getResMW(data, i, j, sel)
 
 
-pdf(paste0(outputFolder, "diffHeatmap ", "lact 3+ ", farmName, ".pdf"))
+pdf(paste0(outputFolder, "/diffHeatmap ", "lact 3+ ", farmName, ".pdf"))
 heatmap(mat, col = c("lightblue", "white", "salmon"), scale = "none")
 dev.off()
 
 
-# pdf(paste0(outputFolder, "diffHeatmap ", "allCows ", farmName, ".pdf"))
+# pdf(paste0(outputFolder, "/diffHeatmap ", "allCows ", farmName, ".pdf"))
 # heatmap(mat, col = c("lightblue", "white", "salmon"), scale = "none")
 # dev.off()
 
@@ -168,7 +168,7 @@ dev.off()
 
 
 
-pdf(paste0(outputFolder, "diffHeatmap ", "summary ", farmName, ".pdf"))
+pdf(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, ".pdf"))
 
 for (lact in 0:length(unique(data$lact))) {
   for (stage in 0:length(unique(data$stage))) {
@@ -264,7 +264,7 @@ stopifnot(farmName == "Lad")
 
 
 
-pdf(paste0(outputFolder, "diffHeatmap ", "summary ", farmName, " SIDES.pdf"))
+pdf(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, " SIDES.pdf"))
 
 dendro <- F
 
@@ -280,17 +280,20 @@ for (lact in 0:length(unique(data$lact))) {
     
     if (lact == 0 & stage == 0) {
       selCows <- 1:nrow(data)
-      title <- paste0("All cows", " (n = ", length(sel), ")")
+      title <- paste0("All cows", " (n = ", length(selCows), ")")
     } else if (lact == 0) {
       selCows <- which(data$stage == sort(unique(data$stage))[stage])
-      title <- paste0("Stage: ", sort(unique(data$stage))[stage], " (n = ", length(sel), ")")
+      title <- paste0("Stage: ", sort(unique(data$stage))[stage], " (n = ", length(selCows), ")")
     } else if (stage == 0) {
       selCows <- which(data$lact == sort(unique(data$lact))[lact])
-      title <- paste0("Lact: ", sort(unique(data$lact))[lact], " (n = ", length(sel), ")")
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], " (n = ", length(selCows), ")")
     } else  {
       selCows <- which(data$lact == sort(unique(data$lact))[lact] & data$stage == sort(unique(data$stage))[stage])
-      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], " (n = ", length(sel), ")")
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], " (n = ", length(selCows), ")")
     }
+    
+    print(length(selCows))
+    print(title)
     
     selUnits <- which(colnames(data) %in% c("bed1_left", "bed1_right", "bed2_left", "bed2_right", "bed3_left", "bed4_left")) # Lad farm only: left side
     plotSummaryHeatmapDiff(data, selUnits, selCows, title = paste0("Left side of the barn: ", title), dendro = dendro)
