@@ -52,7 +52,7 @@ tags <- tags[which(is.na(match(tags, perfTags$tag_string)))]
 
 
 if (FALSE) {
-  pdf("../graphs/PAplot Wim.pdf")
+  pdf(paste0(outputFolder, "/PAplot Wim.pdf"))
   
   for (tag in tags) {
     print(tag)
@@ -155,7 +155,7 @@ if (FALSE) {
                                 title = paste0("Cubicle usage of all cows on ", date))
   
   
-  pdf("../graphs/cubicleHeatmap.pdf")
+  pdf(paste0(outputFolder, "/cubicleHeatmap.pdf"))
   plotBarn(barn, axes = "F")
   addCubicleHeatmap(hml, factor = 1)
   addBarnFeatures(barn)
@@ -176,7 +176,7 @@ if (FALSE) {
     return(cowData$Lactation[which(cowData$CowID == cowID)[1]])
   })
   
-  tiff(paste0("../graphs/cubicleHeatmap by lact ", "Wim ", date, ".tiff"),
+  tiff(paste0(outputFolder, "/cubicleHeatmap by lact ", "Wim ", date, ".tiff"),
        width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
   
   maxHours <- 32
@@ -267,7 +267,7 @@ dimTags <- sapply(tags, function(tag) {
 maxHours <- 32
 
 
-tiff(paste0("../graphs/", "cubicleHeatmap by lact ", "Wim ", startDate, " - ", endDate, ".tiff"),
+tiff(paste0(outputFolder, "/cubicleHeatmap by lact ", "Wim ", startDate, " - ", endDate, ".tiff"),
      width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
 
 opar <- par(mfrow = c(2, 2), mar = c(5, 4, 4, 2) + 0.1 + c(-4, -4, 0, -2))
@@ -316,10 +316,10 @@ dev.off()
 
 # Per lactation
 
-maxHours <- 24
+maxHours <- 24.1
 
 for (lact in 1:3) {
-  tiff(paste0("../graphs/", "cubicleHeatmap lact ", "Wim ", lact, ifelse(lact == 3, "+", ""), " ", startDate, " - ", endDate, ".tiff"),
+  tiff(paste0(outputFolder, "/cubicleHeatmap lact ", "Wim ", lact, ifelse(lact == 3, "+", ""), " ", startDate, " - ", endDate, ".tiff"),
        width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
   
   opar <- par(mfrow = c(2, 2), mar = c(5, 4, 4, 2) + 0.1 + c(-4, -4, 0, -2))
