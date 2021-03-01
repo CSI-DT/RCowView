@@ -269,11 +269,13 @@ getCowID <- function(tag, date, cowTagMap) {
   res <- NA
   since <- 2000 # Limit for time since tag attachment
   for (i in 1:length(sel)) {
-    if (as.Date(cowTagMap$From[sel[i]]) <= date) # Return the earliest fromDate that is later than the date of interest
-      if (as.integer(date - as.Date(cowTagMap$From[sel[i]])) < since) {
-        since <- as.integer(date - as.Date(cowTagMap$From[sel[i]]))
+    if (cowTagMap$From[sel[i]] <= date) {# Return the earliest fromDate that is later than the date of interest
+      diff <- difftime(as.Date(date, origin = "1970-01-01"), as.Date(cowTagMap$From[sel[i]]), units = "days") 
+      if (diff < since) {
+        since <- diff
         res <- cowTagMap$CowID[sel[i]]
       }
+    }
   }
   
   if (since > 7)
