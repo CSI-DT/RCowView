@@ -80,11 +80,15 @@ addPoints <- function(FAdata, id, color, bRotated = F, ...) {
 #' @export
 #'
 addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Average hours per day", ...) {
-  if (maxHours == 0) { #  Define maxHours if it is undefined
-    for (i in 1:length(hml))
-      if (class(hml[[i]]) == "RasterLayer")
-        maxHours <- max(maxHours, hml[[i]]@data@values * factor)
-  }
+  maxCub <- 0
+  for (i in 1:length(hml))
+    if (class(hml[[i]]) == "RasterLayer")
+      maxCub <- max(maxCub, hml[[i]]@data@values * factor)
+  
+  print(paste0("Max time in cubicle: ", maxCub))
+  
+  if (maxHours == 0) #  Define maxHours if it is undefined
+    maxHours <- maxCub
   
   for (i in 1:length(hml))
     if (class(hml[[i]]) == "RasterLayer")
