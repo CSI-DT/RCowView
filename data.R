@@ -196,7 +196,8 @@ read.PAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  PAdata <- vroom(file, col_names = c("FileType", "id", "tag", "t1", "t2", "x", "y", "z", "activity", "dist"), delim = ",")
+  PAdata <- vroom(file, col_names = c("FileType", "id", "tag", "t1", "t2", "x", "y", "z", "activity", "dist"), 
+                  delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   
   return(PAdata)
@@ -257,10 +258,11 @@ readCowTagMap <- function(file) {
 #' @param tag Tag ID
 #' @param date Date of interest
 #' @param cowTagMap Cow-tag mapping data with CowID, Tag, From
+#' @param quiet Logical, if function should write in console
 #' @return CowID corresponding to the selected tag
 #' @export
 #' 
-getCowID <- function(tag, date, cowTagMap) {
+getCowID <- function(tag, date, cowTagMap, quiet = FALSE) {
   sel <- which(cowTagMap$Tag == tag)
   
   if (length(sel) == 0)
@@ -278,7 +280,7 @@ getCowID <- function(tag, date, cowTagMap) {
     }
   }
   
-  if (since > 7)
+  if (!quiet & since > 7)
     message(paste0("Suspicious records: ", ifelse(since > 600, "> 600", since), " days since tag attachment for tag ", tag))
   
   return(res)
@@ -310,10 +312,11 @@ prepareAreas <- function(barn) {
 #' @param date Date of interest
 #' @param areaThreshold Threshold to identify active/inactive tags based on bounding rectangular of all points
 #' @param cacheFile Cache file with saved active tags
+#' @param quiet Logical, if function should write in console
 #' @return Vector of tags that move substantially for the specific day
 #' @export
 #' 
-getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL) {
+getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL, quiet = TRUE) {
   if (!is.null(cacheFile)) {
     # Open or create new cache file
     if (file.exists(cacheFile)) cachedActiveTags <- readRDS(cacheFile) else 
@@ -322,9 +325,11 @@ getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL)
     # Store active tags
     dateStr <- as.character(date)
     if (dateStr %in% ls(cachedActiveTags)) {
-      cat("Loading cached active tags... ")
+      if (!quiet)
+        cat("Loading cached active tags... ")
       activeTags <- cachedActiveTags[[dateStr]]
-      cat("Done!\n")
+      if (!quiet)
+        cat("Done!\n")
       return(activeTags)
     }
   }
