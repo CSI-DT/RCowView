@@ -36,12 +36,12 @@ legend("bottomright", legend = c("Unknown", "Standing", "Walking", "In cubicle",
 
 
 # Plot all PA data for a selected day
-pdf(paste0(outputFolder, "/PAplot ", farmName, " ", format(date, "%d-%m-%Y", ".pdf")))
+pdf(paste0(outputFolder, "/PAplot ", farmName, " ", format(date, "%d-%m-%Y"), ".pdf"))
 
 for (tag in tags) {
   print(tag)
   
-  plotBarn(barn, bRot, axes = FALSE, bText = FALSE, 
+  plotBarn(barn, axes = FALSE, bText = FALSE, 
            main = tag, 
            ylim = c(0, 13000))
   
@@ -75,7 +75,7 @@ dev.off()
 meanPos <- getMeanPosTag(PAdata[which(PAdata$tag %in% tags), ]) #  Only for non-performance tags
 
 
-plotBarn(barn, bRot, axes = TRUE, ylim = c(0, 13000))
+plotBarn(barn, axes = TRUE, ylim = c(0, 13000))
 
 sel <- 1:nrow(meanPos) # All tags
 
@@ -135,5 +135,6 @@ points(meanPos$x[sel], meanPos$y[sel], pch = 19, col = meanPos$lact[sel])
 
 plot(meanPos$lact, meanPos$DIM)
 abline(h = c(50, 150))
+abline(v = c(0.5, 1.5, 2.5))
 
 table(cut(meanPos$lact, breaks = c(0, 1, 2, 100)), cut(meanPos$DIM, breaks =  c(0, 49, 149, Inf)))
