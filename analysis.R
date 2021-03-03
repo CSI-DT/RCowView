@@ -115,50 +115,37 @@ getCubicleUsageHeatmap <- function(data, selectedTagIDs,
 }
 
 
-getTagsInLactation <- function(tags, cowData, lact = 1) {
-  res  <- sapply(tags, function(tag) { 
-    sel <- getTagID(data, tag, cowData)
-    if (length(sel) == 0)
-      return(NA)
-    if (as.integer(cowData$Lactation[sel][1]) == lact)
-      return(cowData$Tag[sel][1])
-    else
-      return(NA)
-  })
-  
-  res <- res[which(!is.na(res))] # Remove NAs
-  
-  return(res)
-}
-
-
-getTagsInDIM <- function(tags, cowData, dimLow = 1, dimHigh = 49) {
-  res  <- sapply(tags, function(tag) { 
-    sel <- getTagID(data, tag, cowData)
-    if (length(sel) == 0)
-      return(NA)
-    if (as.integer(cowData$DIM[sel][1]) >= dimLow & as.integer(cowData$DIM[sel][1]) <= dimHigh)
-      return(cowData$Tag[sel][1])
-    else
-      return(NA)
-  })
-  
-  res <- res[which(!is.na(res))] # Remove NAs
-  
-  return(res)
-}
-
-
 # Subset tags based on lactation and DIM from cowData
-subsetTags <- function(tags, cowData, lactRange = c(0, 30), dimRange = c(0, 999999)) {
-  m <- match(tags, cowData$Tag)
-  m <- na.omit(m)
-  data <- cowData[m, ]
+# Ranges are inclusive on both ends
+subsetTags <- function(tags, cowData, date, lactRange = c(0, 30), dimRange = c(0, 999999)) {
+  res  <- sapply(tags, function(tag) { 
+    cowID <- getCowID(tag, date, cowTagMap, quiet = TRUE)
+    if (is.na(cowID))
+      return(NA)
+    
+    sel <- which(cowData$CowID == cowID) # Select all possible records
+    
+    if (length(sel) == 0)
+      return(NA)
+    
+    DIM <- as.Date(startDate) - as.Date(cowData$CalvingDate)[sel]
+    i <- which.min(replace(DIM, DIM < 0, NA))
+    
+    if (length(i) == 0)
+      return(NA)
+    
+    lactation <- cowData$Lactation[sel[i]] 
+    DIM <- as.Date(startDate) - as.Date(cowData$CalvingDate)[sel[i]]
+    
+    if (lactation >= lactRange[1] & lactation <= lactRange[2] & DIM >= dimRange[1] & DIM <= dimRange[2])
+      return(tag)
+    else
+      return(NA)
+  })
   
-  data <- data[which(as.integer(data$Lactation) >= lactRange[1] & as.integer(data$Lactation) <= lactRange[2] &
-                       as.integer(data$DIM) >= dimRange[1] & as.integer(data$DIM) <= dimRange[2]), ]
+  res <- res[which(!is.na(res))] # Remove NAs
   
-  return(data$Tag)
+  return(res)
 }
 
 
@@ -233,7 +220,8 @@ saveAreaUsageDataToFile <- function(startDate, endDate) {
     tags <- unique(data$tag)
     tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
     
-    tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds")) # Keep only active tags
+    # Keep only active tags
+    tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds"))
     
     dailyUsageData <- getAreaUsageData(data, tags, areas)
     
@@ -254,7 +242,7 @@ saveAreaUsageDataToFile <- function(startDate, endDate) {
         matching[i] <- sel
       if (length(sel) > 1) {
         sinceCalv <- as.integer(date - cowData$CalvingDate[sel]) # Days since calving for each lactation
-        sinceCalv[which(sinceCalv < 0)] <- 1000 # Discard negative values
+        sinceCalv[which(sinceCalv < 0)] <- 10000 # Discard negative values
         matching[i] <- sel[which.min(sinceCalv)]
       }
     }
