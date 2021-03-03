@@ -66,8 +66,11 @@ readCowData <- function() {
   
   cowDataPrev <- cowDataPrev[, c("CowID", "Lactation", "CalvingDate")]
   
-  
   cowData <- rbind(cowData, cowDataPrev)
+  
+  
+  # Remove duplicates
+  cowData <- cowData[!duplicated(cowData[c("CowID", "CalvingDate")]), ]
   
   return(cowData)
 }
