@@ -335,6 +335,7 @@ getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL,
   }
   
   tags <- sort(unique(data$tag))
+  tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
   
   activeTags <- c()
   for (tagID in tags) {
