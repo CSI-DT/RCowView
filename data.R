@@ -339,7 +339,8 @@ getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL,
   
   activeTags <- c()
   for (tagID in tags) {
-    area <- (max(data$x) - min(data$x)) * (max(data$y) - min(data$y))
+    area <- (max(data$x[which(data$tag == tagID)]) - min(data$x[which(data$tag == tagID)])) * 
+      (max(data$y[which(data$tag == tagID)]) - min(data$y[which(data$tag == tagID)]))
     
     if (area > areaThreshold) {
       activeTags <- c(activeTags, tagID)
