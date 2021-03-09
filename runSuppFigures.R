@@ -31,7 +31,7 @@ makeSummaryPlot <- function(startDate, endDate,
   for (case in 1:4) {
     print(paste0("Sub-figure ", case, ": ", subMain[case]))
     
-    sumHML <- list(0, 0, 0, 0, 0, 0)
+    sumHML <- as.list(rep(0, length(beds)))
     
     for (d in 1:length(dates)) {
       date <- dates[d]
@@ -57,7 +57,7 @@ makeSummaryPlot <- function(startDate, endDate,
                                     units = beds, rows = bedRows, cols = bedCols,
                                     tags, bPlot = FALSE)
       
-      for (i in 1:6)
+      for (i in 1:length(beds))
         sumHML[[i]] <- sumHML[[i]] + hml[[i]]
     }
     
@@ -86,6 +86,8 @@ endDate <- "2020-11-10"
 
 
 maxHours <- 20
+maxHours <- 32
+maxHours <- 36.5 # Wim
 
 selTagByLact <- function(case, active, cowData, date) {
   if (case == 1)
@@ -116,6 +118,7 @@ dev.off()
 
 
 maxHours <- 12
+maxHours <- 24 # Wim
 
 selTagByEarlyLactDIM <- function(case, active, cowData, date) {
   if (case == 1)
