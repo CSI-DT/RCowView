@@ -1,3 +1,6 @@
+######### Analysis of cubicle usage: heatmaps ###########
+
+
 source("init.R") # Load user-specific settings, e.g. file names for analysis, etc.
 source("data.R") # Load data methods
 source("plot.R") # Load plot methods
@@ -16,9 +19,7 @@ startDate <- "2020-11-02"
 endDate <- "2020-11-10"
 
 
-fileName <- paste0("Fig1 - cubicleHeatmap ", farmName)
-
-tiff(paste0(outputFolder, fileName, " ", startDate, " - ", endDate, ".tiff"), 
+tiff(paste0(outputFolder, "/Fig1 - cubicleHeatmap ", farmName, " ", startDate, " - ", endDate, ".tiff"), 
      width = 800 * 4, height = 800 * 6, res = 600, compression = 'lzw')
 
 plotCubicleUsageHeatmap(startDate, endDate, beds, bedRows, bedCols, ylim = c(960, 8700))
