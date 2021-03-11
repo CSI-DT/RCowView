@@ -31,15 +31,14 @@ getInterval <- function(FAdata,
   start.epoch <- as.integer(start)
   end.epoch <- as.integer(end)
   
-  test <- FAdata$time / 1000 >= start.epoch & FAdata$time / 1000 <= end.epoch
-  data <- FAdata[test, ]
+  data <- FAdata[FAdata$time / 1000 >= start.epoch & FAdata$time / 1000 <= end.epoch, ]
   
-  start1 <- as.POSIXct(min(as.numeric(data$time)) / 1000, origin = "1970-01-01")
-  end1 <- as.POSIXct(max(as.numeric(data$time)) / 1000, origin = "1970-01-01")
+  newStart <- as.POSIXct(min(as.numeric(data$time)) / 1000, origin = "1970-01-01")
+  newEnd <- as.POSIXct(max(as.numeric(data$time)) / 1000, origin = "1970-01-01")
   
-  print(paste0("The data for cow ", unique(FAdata$id), 
-               " starts at: ", start1,
-               " and ends at: ", end1))
+  print(paste0("The data for cows ", paste0(unique(FAdata$id),collapse = ", "), 
+               " spans between ", newStart,
+               " and ", newEnd))
   
   return(data)
 }
@@ -115,12 +114,14 @@ getTimeRange <- function(FAdata) {
 #' Rasterize points
 #' @param FAdata Dataframe with FA data
 #' @param id ID of a selected cow
+#' @param start Start of the time interval
+#' @param end End of the time interval
 #' @param grid Raster object that describes division into cells
 #' @param bRotated Logical, if the raster is rotated
 #' @return Raster object with point counts
 #' @export
 #' 
-rasterizePoints <- function(FAdata, id, grid = NULL, bRotated = F) {
+rasterizePoints <- function(FAdata, id, start, end, grid = NULL, bRotated = F) {
   require(raster)
   
   Ex1.ID1 <- getIndividual(FAdata, id)
@@ -135,7 +136,7 @@ rasterizePoints <- function(FAdata, id, grid = NULL, bRotated = F) {
   }
   
   if (is.null(grid))
-    grid <- getDrid(x, y, bRotated)
+    grid <- getGrid(x, y, bRotated)
   
   res <- rasterize(cbind(x, y), grid, fun = 'count')
   
@@ -215,7 +216,8 @@ read.PAAData <- function(file) {
   require(vroom)
   
   start <- Sys.time()
-  PAAdata <- vroom(file, col_names = c("FileType", "id", "tag", "time", "interval", "activity", "dist", "periods", "duration"), 
+  PAAdata <- vroom(file, col_names = c("FileType", "id", "tag", "time", "interval", 
+                                       "activity", "dist", "periods", "duration"), 
                    delim = ",")
   print(paste0("Read in ", Sys.time() - start, " seconds"))
   
@@ -271,7 +273,7 @@ getCowID <- function(tag, date, cowTagMap, quiet = FALSE) {
   res <- NA
   since <- 2000 # Limit for time since tag attachment
   for (i in 1:length(sel)) {
-    if (cowTagMap$From[sel[i]] <= date) {# Return the earliest fromDate that is later than the date of interest
+    if (cowTagMap$From[sel[i]] <= date) { # Return the latest fromDate that is earlier than the date of interest
       diff <- difftime(as.Date(date, origin = "1970-01-01"), as.Date(cowTagMap$From[sel[i]]), units = "days") 
       if (diff < since) {
         since <- diff
@@ -281,7 +283,8 @@ getCowID <- function(tag, date, cowTagMap, quiet = FALSE) {
   }
   
   if (!quiet & since > 7)
-    message(paste0("Suspicious records: ", ifelse(since > 600, "> 600", since), " days since tag attachment for tag ", tag))
+    message(paste0("Suspicious records: ", ifelse(since > 600, "> 600", since), 
+                   " days since tag attachment for tag ", tag))
   
   return(res)
 }

@@ -30,9 +30,8 @@ plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, bText = FALSE, ...) {
       plot(c(barn$y1[1], barn$y3[1]), c(-barn$x1[1], -barn$x3[1]), 
            asp = 1, cex = 0, xlab = "", ylab = "", ...)
     
-    rect(barn$y1, -barn$x1, barn$y3, -barn$x3) # Plot rectangles
-    
-    barn <- barn[-1, ] # Remove Base
+    rect(barn$y1[1], -barn$x1[1], barn$y3[1], -barn$x3[1], col = "gray90") # Base
+    rect(barn$y1[-1], -barn$x1[-1], barn$y3[-1], -barn$x3[-1]) # Units
     
     if (bText)
       text((barn$y1 + barn$y3) / 2, -(barn$x1 + barn$x3) / 2, barn$Unit, cex = 0.5)
@@ -43,12 +42,15 @@ plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, bText = FALSE, ...) {
 #' Add points for all individual during the same time interval
 #' @param FAdata Dataframe with FA data
 #' @param id ID of selected cow
+#' @param start Start of the time interval
+#' @param end End of the time interval
 #' @param color Color of points
 #' @param bRotated Logical, if the layout should be rotated
 #' @param ... Additional graphic parameters
 #' @export
 #' 
-addPoints <- function(FAdata, id, color, bRotated = F, ...) {
+addPoints <- function(FAdata, id, start = "2019-11-15 01:00:00 CET", 
+                      end = "2019-11-17 02:05:00 CET", color, bRotated = F, ...) {
   Ex1.ID1 <- getIndividual(FAdata, id)
   Ex1.ID1.Interval <- getInterval(Ex1.ID1, 
                                   start = start, 
@@ -73,8 +75,8 @@ addPoints <- function(FAdata, id, color, bRotated = F, ...) {
 
 #' Add cubicle heatmaps to the barn plot (should be called separately)
 #' @param hml List of RasterLayers
-#' @param maxHours Logical, if the layout should be rotated
-#' @param factor Is used to get average time by multiplying values for each raster by the factor (maxHours is not affected)
+#' @param maxHours Maximum time spent in any cubicle (in hours)
+#' @param factor Used to get average time by multiplying values for each raster by the factor (maxHours is not affected)
 #' @param legendText Text for the legend
 #' @param ... Additional graphic parameters
 #' @export
@@ -93,7 +95,8 @@ addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Avera
   for (i in 1:length(hml))
     if (class(hml[[i]]) == "RasterLayer")
       if (maxHours < max(hml[[i]]@data@values * factor))
-        message(paste0("Warning: current maxHours variable is too low, increase it above ", max(hml[[i]]@data@values * factor)))
+        message(paste0("Warning: current maxHours variable is too low, increase it above ", 
+                       max(hml[[i]]@data@values * factor)))
   
   bLegend <- TRUE # Used to plot the legend only once
   for (i in 1:length(hml))
@@ -121,13 +124,14 @@ addBarnFeatures <- function(barn, ...) {
 #' Plot the cubicle usage heatmap
 #' @param startDate Start date
 #' @param endDate End date
+#' @param barn Barn layout
 #' @param units Names of units (i.e. beds) with cubicles
 #' @param rows Vector of number of rows in each unit/bed
 #' @param cols Vector of number of columns in each unit/bed
 #' @param ... Additional graphic parameters
 #' @export
 #' 
-plotCubicleUsageHeatmap <- function(startDate, endDate, units, rows, cols, ...) {
+plotCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, cols, ...) {
   dates <- as.Date(as.Date(startDate):as.Date(endDate), origin = "1970-01-01")
   
   opar <- par(mar = c(5, 4, 4, 2) + 0.1 + c(-4, -4, 0, -2))
@@ -145,7 +149,9 @@ plotCubicleUsageHeatmap <- function(startDate, endDate, units, rows, cols, ...) 
     
     tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds")) # Keep only active tags
     
-    hml <- getCubicleUsageHeatmap(data, tags, units = units,
+    hml <- getCubicleUsageHeatmap(data, tags, 
+                                  barn = barn, 
+                                  units = units,
                                   rows = rows,
                                   cols = cols,
                                   bPlot = FALSE)

@@ -55,6 +55,7 @@ getMeanPosTag <- function(PAdata) {
 # selectedTagIDs - selected tag IDs, e.g. those in first lactation
 # maxHours <- 0 # Maximum time spent in any cubicle (in hours)
 getCubicleUsageHeatmap <- function(data, selectedTagIDs, 
+                                   barn,
                                    units = c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6"),
                                    rows = rep(16, 6),
                                    cols = rep(2, 6),
@@ -70,7 +71,8 @@ getCubicleUsageHeatmap <- function(data, selectedTagIDs,
     cat(unit)
     
     sel <- which(barn$Unit == unit)
-    grid <- getGrid(c(barn$x1[sel], barn$x3[sel]), c(barn$y1[sel], barn$y3[sel]), nrow = rows[uIndex], ncol = cols[uIndex], bRot)
+    grid <- getGrid(c(barn$x1[sel], barn$x3[sel]), c(barn$y1[sel], barn$y3[sel]), 
+                    nrow = rows[uIndex], ncol = cols[uIndex], bRot)
     
     bedLayer <- 0
     for (tag in selectedTagIDs) {
@@ -181,7 +183,8 @@ getAreaUsageData <- function(data, selectedTagIDs, areas) {
       
       sel <- which(areas$Unit == unit)
       
-      unitTime <- sum(df$t[which(df$x > areas$x1[sel] & df$x < areas$x3[sel] & df$y > areas$y1[sel] & df$y < areas$y3[sel])])
+      unitTime <- sum(df$t[which(df$x > areas$x1[sel] & df$x < areas$x3[sel] & 
+                                   df$y > areas$y1[sel] & df$y < areas$y3[sel])])
       
       unitTime <- unitTime / areas$NumCub[sel] # Adjust by the number of cubicles
       
@@ -200,9 +203,10 @@ getAreaUsageData <- function(data, selectedTagIDs, areas) {
 #' @details Tags that could not be matched to the corresponding cow data are saved in another file
 #' @param startDate Start date
 #' @param endDate End date
+#' @param areas Dataframe with data on areas
 #' @export
 #' 
-saveAreaUsageDataToFile <- function(startDate, endDate) {
+saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
   dates <- as.Date(as.Date(startDate):as.Date(endDate), origin = "1970-01-01")
   
   totalUsageData <- data.frame()
@@ -270,7 +274,8 @@ saveAreaUsageDataToFile <- function(startDate, endDate) {
       m1 <- match(dailyUsageData$Cow, totalUsageData$Cow)
       for (i in 1:length(m1)) {
         if (!is.na(m1[i])) {
-          totalUsageData[m1[i], 1:nrow(areas)] <- totalUsageData[m1[i], 1:nrow(areas)] + dailyUsageData[i, 1:nrow(areas)]
+          totalUsageData[m1[i], 1:nrow(areas)] <- totalUsageData[m1[i], 1:nrow(areas)] + 
+                                                  dailyUsageData[i, 1:nrow(areas)]
           totalUsageData$days[m1[i]] <- totalUsageData$days[m1[i]] + 1
         }
       }
