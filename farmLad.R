@@ -16,7 +16,7 @@ addBarnFeatures <- function(barn) {
   sel <- which(barn$Unit == "feed")
   rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5))
   
-  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Unit[-1], cex = 0.5)
+  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Name[-1], cex = 0.5)
   
   
   text(mid, 1300, "Milking area")
@@ -45,6 +45,30 @@ addBarnFeatures <- function(barn) {
 
 readBarnData <- function(file) {
   barn <- read.csv(file, sep = ";")
+  
+  # barn[which(barn$Unit == "robotbed1"), 1] <- "mbed1"
+  newRow <- barn[which(barn$Unit == "robotbed2"), ]
+  newRow[1] <- "mbed2"
+  barn <- rbind(barn, newRow)
+  
+  sel <- which(barn$Unit == "mbed2")
+  newX <- barn$x1[sel] + (barn$x4[sel] - barn$x1[sel]) / 7
+  barn$x1[sel] <- newX
+  barn$x2[sel] <- newX
+  
+  
+  
+  
+  # Add names to units
+  barn$Name <- barn$Unit
+  barn$Name[which(barn$Unit == "robotbed1")] <- "bed7"
+  barn$Name[which(barn$Unit == "robotbed2")] <- ""
+  barn$Name[which(barn$Unit == "mbed2")] <- "bed8"
+  barn$Name[which(barn$Unit == "feed")] <- "Feed table"
+  barn$Name[which(barn$Unit == "deepstraw1")] <- ""
+  barn$Name[which(barn$Unit == "deepstraw2")] <- ""
+  barn$Name[which(barn$Unit == "bed8")] <- ""
+  barn$Name[which(barn$Unit == "bed9")] <- ""
   
   return(barn)
 }
@@ -217,7 +241,20 @@ prepareAreas <- function(barn) {
     areas <- rbind(areas, rightRow)
   }
   
-  areas$NumCub <- rep(16, 12)
+  for (unit in c("robotbed1", "mbed2")) {
+    sel <- which(barn$Unit == unit)[1]
+    oldRow <- barn[sel, ]
+    
+    if (unit == "robotbed1")
+      oldRow[1] <- "bed7"
+    
+    if (unit == "mbed2")
+      oldRow[1] <- "bed8"
+    
+    areas <- rbind(areas, oldRow)
+  }
+  
+  areas$NumCub <- c(rep(16, 12), 7, 6)
   
   return(areas)
 }
@@ -226,6 +263,10 @@ prepareAreas <- function(barn) {
 beds <- c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6")
 bedRows <- rep(16, 6)
 bedCols <- rep(2, 6)
+
+beds <- c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6", "robotbed1", "mbed2")
+bedRows <- c(bedRows, 1, 1)
+bedCols <- c(bedCols, 7, 6)
 
 
 
