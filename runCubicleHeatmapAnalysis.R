@@ -19,10 +19,17 @@ startDate <- "2020-11-02"
 endDate <- "2020-11-10"
 
 
+if (farmName == "Wim")
+  ylim <- c(960, 7700)
+
+if (farmName == "Lad")
+  ylim <- c(960, 8500)
+
 tiff(paste0(outputFolder, "/Fig1 - cubicleHeatmap ", farmName, " ", startDate, " - ", endDate, ".tiff"), 
      width = 800 * 4, height = 800 * 6, res = 600, compression = 'lzw')
 
-plotCubicleUsageHeatmap(startDate, endDate, beds, bedRows, bedCols, ylim = c(960, 8700))
+plotCubicleUsageHeatmap(startDate, endDate, barn, beds, bedRows, bedCols, ylim = ylim, 
+                        cacheFile = paste0(cacheFolder, "/cubicleHeatmap ", farmName, " ", startDate, " - ", endDate, ".rds"))
 # mtext(paste0("Cubicle usage between ", startDate, " and ", endDate), side = 3, line = 2) # Add title
 
 dev.off()

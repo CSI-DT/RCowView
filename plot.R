@@ -128,41 +128,25 @@ addBarnFeatures <- function(barn, ...) {
 #' @param units Names of units (i.e. beds) with cubicles
 #' @param rows Vector of number of rows in each unit/bed
 #' @param cols Vector of number of columns in each unit/bed
+#' @param cacheFile Cache file to store results of calculation
 #' @param ... Additional graphic parameters
 #' @export
 #' 
-plotCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, cols, ...) {
+plotCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, cols, cacheFile = NULL, ...) {
   dates <- as.Date(as.Date(startDate):as.Date(endDate), origin = "1970-01-01")
+  
+  if (!is.null(cacheFile) & file.exists(cacheFile)) sumHML <- readRDS(cacheFile) else {
+    sumHML <- calculateCubicleUsageHeatmap(startDate, endDate, barn, units, rows, cols, ...)
+    saveRDS(sumHML, cacheFile)
+  }
   
   opar <- par(mar = c(5, 4, 4, 2) + 0.1 + c(-4, -4, 0, -2))
   
-  sumHML <- as.list(rep(0, length(units)))
-  
-  for (d in 1:length(dates)) {
-    date <- dates[d]
-    print(date)
-    
-    data <- getDailyDataPA(date)
-    
-    tags <- unique(data$tag)
-    tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
-    
-    tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds")) # Keep only active tags
-    
-    hml <- getCubicleUsageHeatmap(data, tags, 
-                                  barn = barn, 
-                                  units = units,
-                                  rows = rows,
-                                  cols = cols,
-                                  bPlot = FALSE)
-    
-    for (i in 1:length(units))
-      sumHML[[i]] <- sumHML[[i]] + hml[[i]]
-  }
-  
-  plotBarn(barn, axes = F)
+  plotBarn(barn, axes = F, ...)
   addCubicleHeatmap(sumHML, factor = 1 / length(dates), ...)
   addBarnFeatures(barn)
+  
+  par(opar)
 }
 
 

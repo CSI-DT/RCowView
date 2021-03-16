@@ -11,6 +11,9 @@ dataFolder <- "C:/Data"
 # Folder for output graphs, CSV files, etc.
 outputFolder <- "../graphs"
 
+# Folder for cached (pre-calculated) data
+cacheFolder <- "cache"
+
 
 
 
