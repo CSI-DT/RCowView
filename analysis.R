@@ -54,7 +54,7 @@ getMeanPosTag <- function(PAdata) {
 # Cubicle usage heatmap
 # selectedTagIDs - selected tag IDs, e.g. those in first lactation
 # maxHours <- 0 # Maximum time spent in any cubicle (in hours)
-getCubicleUsageHeatmap <- function(data, selectedTagIDs, 
+getDailyCubicleUsageHeatmap <- function(data, selectedTagIDs, 
                                    barn,
                                    units = c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6"),
                                    rows = rep(16, 6),
@@ -117,40 +117,6 @@ getCubicleUsageHeatmap <- function(data, selectedTagIDs,
 }
 
 
-# Subset tags based on lactation and DIM from cowData
-# Ranges are inclusive on both ends
-subsetTags <- function(tags, cowData, date, lactRange = c(0, 30), dimRange = c(0, 999999)) {
-  res  <- sapply(tags, function(tag) { 
-    cowID <- getCowID(tag, date, cowTagMap, quiet = TRUE)
-    if (is.na(cowID))
-      return(NA)
-    
-    sel <- which(cowData$CowID == cowID) # Select all possible records
-    
-    if (length(sel) == 0)
-      return(NA)
-    
-    DIM <- as.Date(startDate) - as.Date(cowData$CalvingDate)[sel]
-    i <- which.min(replace(DIM, DIM < 0, NA))
-    
-    if (length(i) == 0)
-      return(NA)
-    
-    lactation <- cowData$Lactation[sel[i]] 
-    DIM <- as.Date(startDate) - as.Date(cowData$CalvingDate)[sel[i]]
-    
-    if (lactation >= lactRange[1] & lactation <= lactRange[2] & DIM >= dimRange[1] & DIM <= dimRange[2])
-      return(tag)
-    else
-      return(NA)
-  })
-  
-  res <- res[which(!is.na(res))] # Remove NAs
-  
-  return(res)
-}
-
-
 #' Calculate time spent in-cubicle in each of the selected areas by selected tags
 #' @param data Dataframe with PA data
 #' @param selectedTagIDS Selected tags 
@@ -158,7 +124,7 @@ subsetTags <- function(tags, cowData, date, lactRange = c(0, 30), dimRange = c(0
 #' @return Dataframe with area usage data by cow
 #' @export
 #' 
-getAreaUsageData <- function(data, selectedTagIDs, areas) {
+getDailyAreaUsageData <- function(data, selectedTagIDs, areas) {
   usageData <- data.frame(tag = selectedTagIDs, stringsAsFactors = FALSE) # Resulting data frame
   
   units <- areas$Unit
@@ -199,6 +165,47 @@ getAreaUsageData <- function(data, selectedTagIDs, areas) {
 }
 
 
+#' Calculate cubicle usage heatmap
+#' @param startDate Start date
+#' @param endDate End date
+#' @param barn Barn layout
+#' @param units Names of units (i.e. beds) with cubicles
+#' @param rows Vector of number of rows in each unit/bed
+#' @param cols Vector of number of columns in each unit/bed
+#' @param ... Additional graphic parameters
+#' @export
+#' 
+calculateCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, cols, ...) {
+  dates <- as.Date(as.Date(startDate):as.Date(endDate), origin = "1970-01-01")
+  
+  sumHML <- as.list(rep(0, length(units)))
+  
+  for (d in 1:length(dates)) {
+    date <- dates[d]
+    print(date)
+    
+    data <- getDailyDataPA(date)
+    
+    tags <- unique(data$tag)
+    tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
+    
+    tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds")) # Keep only active tags
+    
+    hml <- getDailyCubicleUsageHeatmap(data, tags, 
+                                       barn = barn, 
+                                       units = units,
+                                       rows = rows,
+                                       cols = cols,
+                                       bPlot = FALSE)
+    
+    for (i in 1:length(units))
+      sumHML[[i]] <- sumHML[[i]] + hml[[i]]
+  }
+  
+  return(sumHML)
+}
+
+
 #' Calculate and save area usage data to file
 #' @details Tags that could not be matched to the corresponding cow data are saved in another file
 #' @param startDate Start date
@@ -227,7 +234,7 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
     # Keep only active tags
     tags <- getActiveTags(data, date, cacheFile = paste0("cachedActiveTags_", farmName, ".rds"))
     
-    dailyUsageData <- getAreaUsageData(data, tags, areas)
+    dailyUsageData <- getDailyAreaUsageData(data, tags, areas)
     
     dailyUsageData <- dailyUsageData[which(rowSums(dailyUsageData[, -1]) > 0), ] # Remove zero-usage tags
     
@@ -245,9 +252,10 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
       if (length(sel) == 1)
         matching[i] <- sel
       if (length(sel) > 1) {
-        sinceCalv <- as.integer(date - cowData$CalvingDate[sel]) # Days since calving for each lactation
+        # Days since calving (at end) for each lactation
+        sinceCalv <- as.integer(as.Date(endDate) - cowData$CalvingDate[sel])
         sinceCalv[which(sinceCalv < 0)] <- 10000 # Discard negative values
-        matching[i] <- sel[which.min(sinceCalv)]
+        matching[i] <- sel[which.min(sinceCalv)] # Choose min
       }
     }
     
@@ -272,6 +280,9 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
       totalUsageData$days <- rep(1, nrow(totalUsageData))
     } else {
       m1 <- match(dailyUsageData$Cow, totalUsageData$Cow)
+      
+      print(dailyUsageData[which(is.na(m1)), ])
+      
       for (i in 1:length(m1)) {
         if (!is.na(m1[i])) {
           totalUsageData[m1[i], 1:nrow(areas)] <- totalUsageData[m1[i], 1:nrow(areas)] + 
@@ -280,22 +291,21 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
         }
       }
       
-      m2 <- match(totalUsageData$Cow, dailyUsageData$Cow)
+      # Add previously not encountered cows
       dailyUsageData$days <- rep(1, nrow(dailyUsageData)) # Add number of days
-      newCows <- which(is.na(m2))
+      
+      newCows <- which(is.na(m1))
       totalUsageData <- rbind(totalUsageData, dailyUsageData[newCows, ])
+      
+      print(totalUsageData$Cow)
     }
   }
   
-  
-  print(head(totalUsageData))
-  
-  
   write.table(totalUsageData, 
-              paste0(outputFolder, "areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), 
+              paste0(cacheFolder, "/areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), 
               row.names = F, sep  = ";")
   
   write.table(data.frame(MissingTags = naTags, Day = as.Date(naDays, origin = "1970-01-01")), 
-              paste0(outputFolder, "non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), 
+              paste0(cacheFolder, "/non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), 
               row.names = F, sep  = ";")
 }
