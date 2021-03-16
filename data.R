@@ -361,3 +361,73 @@ getActiveTags <- function(data, date, areaThreshold = 5000000, cacheFile = NULL,
   
   return(activeTags)
 }
+
+
+
+
+
+# Select row index of cowData that gives the smallest positive DIM on a specified date
+selectCowIndex <- function(cowID, date) {
+  sel <- which(cowData$CowID == cowID) # Select all possible records for selected cows
+  
+  if (length(sel) == 0)
+    return(NA)
+  
+  # Select calving date
+  dims <- as.Date(date) - as.Date(cowData$CalvingDate)[sel]
+  i <- which.min(replace(dims, dims < 0, NA))
+  
+  return(sel[i])
+}
+
+
+# Get DIM of a cow on a specified date, refDate is used to select calving (DIM on refDate should be positive)
+getDIM <- function(cowID, date, refDate = endDate) {
+  if (is.na(cowID))
+    return(NA)
+  
+  index <- selectCowIndex(cowID, refDate)
+  
+  DIM <- as.Date(date) - as.Date(cowData$CalvingDate)[index]
+  
+  return(DIM)
+}
+
+
+# Get parity of a cow on a specified date, refDate is used to select calving (DIM on refDate should be positive
+getParity <- function(cowID, date, refDate = endDate) {
+  if (is.na(cowID))
+    return(NA)
+  
+  index <- selectCowIndex(cowID, refDate)
+  
+  lactation <- cowData$Lactation[index] 
+  
+  return(lactation)
+}
+
+
+# Subset tags based on lactation and DIM from cowData
+# Ranges are inclusive on both ends
+subsetTags <- function(tags, cowData, date, lactRange = c(0, 30), dimRange = c(0, 999999)) {
+  res  <- sapply(tags, function(tag) { 
+    cowID <- getCowID(tag, date, cowTagMap, quiet = TRUE)
+    
+    lactation <- getParity(cowID,  date)
+    if (is.na(lactation))
+      return(NA)
+    
+    DIM <- getDIM(cowID,  date)
+    if (is.na(DIM))
+      return(NA)
+    
+    if (lactation >= lactRange[1] & lactation <= lactRange[2] & DIM >= dimRange[1] & DIM <= dimRange[2])
+      return(tag)
+    else
+      return(NA)
+  })
+  
+  res <- res[which(!is.na(res))] # Remove NAs
+  
+  return(res)
+}
