@@ -7,7 +7,7 @@ source("plot.R") # Load plot methods
 source("analysis.R") # Load analysis methods
 
 source("farmWim.R") # Farm-specific functions
-source("farmLad.R") # Farm-specific functions
+# source("farmLad.R") # Farm-specific functions
 
 
 startDate <- "2020-11-02"
@@ -18,17 +18,19 @@ endDate <- "2020-11-10"
 
 
 # Generate data for the analysis first
-if (FALSE)
-  saveAreaUsageDataToFile(startDate, endDate)
+# if (FALSE)
+  saveAreaUsageDataToFile(startDate, endDate, areas)
 
 
 
 
-data <- read.csv(paste0(outputFolder, "/areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), sep = ";")
+data <- read.csv(paste0(cacheFolder, "/areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), sep = ";")
+
+print(length(unique(data$Cow)))
 
 data$lact <- cut(data$Lactation, breaks = c(0, 1, 2, Inf), labels = c("1", "2", "3+"))
 
-data$DIM <- as.integer(as.Date(startDate) - as.Date(data$CalvingDate)) #  Mind that we calculate DIM on the startDate!
+data$DIM <- as.integer(as.Date(endDate) - as.Date(data$CalvingDate)) #  Mind that we calculate DIM on the endDate!
 data$stage <- cut(data$DIM, breaks = c(-1, 49, 149, Inf), labels = c("Early", "Mid", "Late"))
 
 
@@ -61,9 +63,8 @@ testMW <- function(data, i, j, selGroup) {
   
   res <- wilcox.test(x[sel], y[sel], paired = TRUE)
   
-  
-  hist(x[sel])
-  hist(y[sel])
+  # hist(x[sel])
+  # hist(y[sel])
   
   less <- wilcox.test(x[sel], y[sel], alternative = "less", paired = TRUE)
   gr <- wilcox.test(x[sel], y[sel], alternative = "greater", paired = TRUE)
@@ -189,7 +190,8 @@ for (lact in 0:length(unique(data$lact))) {
       title <- paste0("Lact: ", sort(unique(data$lact))[lact], " (n = ", length(sel), ")")
     } else  {
       sel <- which(data$lact == sort(unique(data$lact))[lact] & data$stage == sort(unique(data$stage))[stage])
-      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], " (n = ", length(sel), ")")
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], 
+                      " (n = ", length(sel), ")")
     }
     
     for (i in 1:numUnits)
@@ -199,7 +201,8 @@ for (lact in 0:length(unique(data$lact))) {
     
     rowColors <- rep("red", ncol(mat))
     if (farmName == "Lad")
-      rowColors <- ifelse(colnames(mat) %in% c("bed1_left", "bed1_right", "bed2_left", "bed2_right", "bed3_left", "bed4_left"), "red", "blue")
+      rowColors <- ifelse(colnames(mat) %in% c("bed1_left", "bed1_right", "bed2_left", "bed2_right", 
+                                               "bed3_left", "bed4_left", "bed7"), "red", "blue")
     
     heatmap(mat, 
             # col = c("lightblue", "white", "salmon"), 
@@ -225,8 +228,10 @@ dev.off()
 
 
 selUnits <- 1:numUnits
-selUnits <- which(colnames(data) %in% c("bed1_left", "bed1_right", "bed2_left", "bed2_right", "bed3_left", "bed4_left")) # Lad farm only: right
-selUnits <- which(colnames(data) %in% c("bed5_left", "bed5_right", "bed6_left", "bed6_right", "bed3_right", "bed4_right")) # Lad farm only: left
+selUnits <- which(colnames(data) %in% c("bed5_left", "bed5_right", "bed6_left", 
+                                        "bed6_right", "bed3_right", "bed4_right", "bed7")) # Lad farm only: left
+selUnits <- which(colnames(data) %in% c("bed1_left", "bed1_right", "bed2_left", 
+                                        "bed2_right", "bed3_left", "bed4_left", "bed8")) # Lad farm only: right
 
 selCows <- 1:nrow(data); title <- "All cows"
 # selCows <- which(data$lact == "3+")
@@ -262,6 +267,12 @@ plotSummaryHeatmapDiff <- function(data, selUnits, selCows = 1:nrow(data), title
 stopifnot(farmName == "Lad")
 
 
+leftAreas <- c("bed1_left", "bed1_right", "bed2_left", 
+               "bed2_right", "bed3_left", "bed4_left", "bed7")
+
+rightAreas <- c("bed5_left", "bed5_right", "bed6_left", 
+                "bed6_right", "bed3_right", "bed4_right", "bed8")
+
 
 
 pdf(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, " SIDES.pdf"))
@@ -289,16 +300,17 @@ for (lact in 0:length(unique(data$lact))) {
       title <- paste0("Lact: ", sort(unique(data$lact))[lact], " (n = ", length(selCows), ")")
     } else  {
       selCows <- which(data$lact == sort(unique(data$lact))[lact] & data$stage == sort(unique(data$stage))[stage])
-      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], " (n = ", length(selCows), ")")
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], 
+                      " (n = ", length(selCows), ")")
     }
     
     print(length(selCows))
     print(title)
     
-    selUnits <- which(colnames(data) %in% c("bed1_left", "bed1_right", "bed2_left", "bed2_right", "bed3_left", "bed4_left")) # Lad farm only: left side
+    selUnits <- which(colnames(data) %in% leftAreas) # Lad farm only: left
     plotSummaryHeatmapDiff(data, selUnits, selCows, title = paste0("Left side of the barn: ", title), dendro = dendro)
     
-    selUnits <- which(colnames(data) %in% c("bed5_left", "bed5_right", "bed6_left", "bed6_right", "bed3_right", "bed4_right")) # Lad farm only: right side
+    selUnits <- which(colnames(data) %in% rightAreas) # Lad farm only: right
     plotSummaryHeatmapDiff(data, selUnits, selCows, title = paste0("Right side of the barn: ", title), dendro = dendro)
   }
 }

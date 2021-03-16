@@ -18,8 +18,8 @@ endDate <- "2020-11-10"
 
 
 # Generate data for the analysis first
-if (FALSE)
-  saveAreaUsageDataToFile(startDate, endDate)
+# if (FALSE)
+#   saveAreaUsageDataToFile(startDate, endDate, areas)
 
 
 
@@ -29,11 +29,11 @@ size <- 3 #  For plotting
 
 
 
-data <- read.csv(paste0(outputFolder, "/areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), sep = ";")
+data <- read.csv(paste0(cacheFolder, "/areaUsageByCow ", farmName, " ", startDate, " - ", endDate, ".csv"), sep = ";")
 
 data$lact <- cut(data$Lactation, breaks = c(0, 1, 2, Inf), labels = c("1", "2", "3+"))
 
-data$DIM <- as.integer(as.Date(startDate) - as.Date(data$CalvingDate)) #  Mind that we calculate DIM on the startDate!
+data$DIM <- as.integer(as.Date(endDate) - as.Date(data$CalvingDate)) #  Mind that we calculate DIM on the endDate!
 data$stage <- cut(data$DIM, breaks = c(-1, 49, 149, Inf), labels = c("Early", "Mid", "Late"))
 
 
@@ -90,7 +90,7 @@ heatmap(t, Colv = NA, Rowv = NA, scale = "none",
 if (FALSE) {
   plotTime <- function(sel, legend = TRUE, ...) {
     sums <- colSums(data[sel, 1:numUnits])
-    mat <- matrix(sums[c(3, 4, 7, 8, 11, 12, 1, 2, 5, 6, 9, 10)], nrow = 2, byrow = T) # TODO: change to non-Lad farm specific
+    mat <- matrix(sums[c(3, 4, 7, 8, 11, 12, 1, 2, 5, 6, 9, 10)], nrow = 2, byrow = T) # TODO: change to non-Lad specific
     mat <- apply(mat, 2, rev) #  Flip rows
     mat <- mat / length(sel)
     
@@ -111,7 +111,8 @@ if (FALSE) {
   sel <- 1:nrow(data)
   opar <- par(mar = c(5.1 + 2, 4.1, 4.1, 2.1))
   plotTime(sel, main = "All cows", zlim = zlim)
-  addColorBandLegend(title = "Average hours per day", pos = c(0.5, -0.75), length = 0.5, range = zlim, offsets = c(0.1, 0.1), xpd = T)
+  addColorBandLegend(title = "Average hours per day", pos = c(0.5, -0.75), length = 0.5, range = zlim, 
+                     offsets = c(0.1, 0.1), xpd = T)
   par(opar)
   
   
@@ -130,7 +131,8 @@ if (FALSE) {
     plotTime(sel, main = i, zlim = zlim, xpd = T)
   }
   
-  addColorBandLegend(title = "Average hours per day", pos = c(0.5, -0.75), length = 0.5, range = zlim, offsets = c(0.1, 0.1), xpd = T)
+  addColorBandLegend(title = "Average hours per day", pos = c(0.5, -0.75), length = 0.5, range = zlim, 
+                     offsets = c(0.1, 0.1), xpd = T)
   
   
   par(opar)
@@ -151,7 +153,8 @@ if (FALSE) {
     }
   }
   
-  addColorBandLegend(title = "Average hours per day", pos = c(0.5, -0.75), length = 0.5, range = zlim, offsets = c(0.1, 0.1), xpd = T)
+  addColorBandLegend(title = "Average hours per day", pos = c(0.5, -0.75), length = 0.5, range = zlim, 
+                     offsets = c(0.1, 0.1), xpd = T)
   
   par(opar)
   
@@ -221,7 +224,8 @@ totalTime <- rowSums(data[sel, 1:numUnits]  * areas$NumCub) # TODO: check multip
 plot(data$DIM[sel], totalTime, col = data$lact[sel], pch = 19, 
      xlab = "Days in milk (DIM)", ylab = "Total time in cubicle",
      las = 1)
-legend("bottomright", legend = sort(unique(data$lact[sel])), title = "Lactation", col = sort(unique(data$lact[sel])), pch = 19, bg = NA)
+legend("bottomright", legend = sort(unique(data$lact[sel])), title = "Lactation", 
+       col = sort(unique(data$lact[sel])), pch = 19, bg = NA)
 
 
 mat <- matrix(NA, nrow = 3, ncol = 3)
@@ -230,7 +234,8 @@ colnames(mat) <- sort(unique(data$stage))
 
 for (i in 1:3)
   for (j in 1:3)
-    mat[i, j] <- mean(totalTime[which(data$lact == sort(unique(data$lact))[i] & data$stage == sort(unique(data$stage))[j])])
+    mat[i, j] <- mean(totalTime[which(data$lact == sort(unique(data$lact))[i] & 
+                                        data$stage == sort(unique(data$stage))[j])])
 
 
 heatmap(mat, scale = "none", Rowv = NA, Colv = NA, main = "Average time in cubicle")
@@ -281,23 +286,30 @@ plotBarnTime <- function(sel, upperLimit = NA, ...) {
 
 
 
-tiff(paste0(outputFolder, "/Fig2 - areaUsageSummary ", farmName, ".tiff"), width = 2 * size * 500, height = 3 * size * 500, res = 600, compression = 'lzw')
+tiff(paste0(outputFolder, "/Fig2 - areaUsageSummary ", farmName, ".tiff"), 
+     width = 2 * size * 500, height = 3 * size * 500, res = 600, compression = 'lzw')
 opar <- par(mfrow = c(3, 3), mar = c(5.1 - 2, 4.1 - 4, 4.1 - 2.5, 2.1 - 2))
 
-upper <- 0.3
+upper <- 0.32
+
+yRange <- range(2700, barn$y1[which(barn$Unit == "bed1")], barn$y3[1])
 
 for (i in sort(unique(data$lact))) {
   for (j in sort(unique(data$stage))) {
     sel <- which(data$lact == i & data$stage == j)
     plotBarnTime(sel, main = paste0("Lact ", i, " - ", j), upperLimit = upper,
                  xlim = range(barn[1, c("x1", "x3")]),
-                 ylim = range(barn$y1[which(barn$Unit == "bed1")], barn$y3[1]))
+                 # ylim = range(barn$y1[which(barn$Unit == "bed1")], barn$y3[1])
+                 ylim = yRange)
+    
     addBarnFeatures(barn)
     mtext(paste0("n = ", length(sel)), side = 3, line = -0.5, cex = 0.5)
   }
 }
 
-addColorBandLegend(title = "Average hours per day", pos = c((barn$x3[1] + barn$x1[1]) / 2, barn$y1[which(barn$Unit == "bed1")] - 700), 
+addColorBandLegend(title = "Average hours per day", pos = c((barn$x3[1] + barn$x1[1]) / 2, 
+                                                            # barn$y1[which(barn$Unit == "bed1")] - 700), 
+                                                            min(yRange) - 800), 
                    length = 1500, range = c(0, upper), offsets = c(250, 250), xpd = T, cex = 0.8)
 
 par(opar)

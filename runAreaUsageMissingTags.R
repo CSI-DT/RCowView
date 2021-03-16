@@ -20,7 +20,7 @@ endDate <- "2020-11-10"
 
 pdf(paste0(outputFolder, "/missingTags ", farmName, ".pdf"), width = 1.5 * size, height = 3 * size)
 
-missingData <- read.csv(paste0(outputFolder, "/non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), sep = ";")
+missingData <- read.csv(paste0(cacheFolder, "/non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), sep = ";")
 
 for (date in sort(unique(missingData$Day))) {
   cat(date)
