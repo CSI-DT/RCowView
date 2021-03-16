@@ -8,9 +8,9 @@ addBarnFeatures <- function(barn) {
   rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5))
   
   mid <- (barn$x3[which(barn$Unit == "feedtable1")] + barn$x1[which(barn$Unit == "feedtable1")]) / 2
-  text(mid, 300, "Milking area")
+  # text(mid, 300, "Milking area")
   
-  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Unit[-1], cex = 0.5)
+  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Name[-1], cex = 0.5)
 }
 
 
@@ -38,6 +38,14 @@ readBarnData <- function(file) {
     as.integer(barnWim$Zx[which(barnWim$type == "bed5" & barnWim$pointnum == 3)]), 
     as.integer(barnWim$Zx[which(barnWim$type == "bed5" & barnWim$pointnum == 3)])
   )
+  
+  # Add names to units
+  barn$Name <- barn$Unit
+  barn$Name[which(barn$Unit == "robot")] <- "AMS"
+  barn$Name[which(barn$Unit == "bedinsemarea")] <- "Treatment pen"
+  barn$Name[which(barn$Unit == "feedboxes")] <- "Concentrate"
+  barn$Name[which(barn$Unit == "feedtable1")] <- "Feed table"
+  barn$Name[which(barn$Unit == "feedtable2")] <- "Feed table"
   
   return(barn)
 }
@@ -97,7 +105,8 @@ readCowTagMap <- function() {
 
 
 getDailyDataPA <- function(date) {
-  data <- read.PAData(paste0(dataFolder, "/CowDataWim/PA_", as.character(as.Date(date, origin = "1970-01-01"), format = "%Y%m%d"), "T000000UTC.csv"))
+  data <- read.PAData(paste0(dataFolder, "/CowDataWim/PA_", as.character(as.Date(date, origin = "1970-01-01"), 
+                                                                         format = "%Y%m%d"), "T000000UTC.csv"))
   return(data)
 }
 
