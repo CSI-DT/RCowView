@@ -19,7 +19,7 @@ endDate <- "2020-11-10"
 
 # Generate data for the analysis first
 # if (FALSE)
-  saveAreaUsageDataToFile(startDate, endDate, areas)
+#   saveAreaUsageDataToFile(startDate, endDate, areas)
 
 
 
@@ -238,7 +238,7 @@ selCows <- 1:nrow(data); title <- "All cows"
 
 
 
-plotSummaryHeatmapDiff <- function(data, selUnits, selCows = 1:nrow(data), title = "", dendro = TRUE) {
+plotSummaryHeatmapDiffPrev <- function(data, selUnits, selCows = 1:nrow(data), title = "", dendro = TRUE) {
   mat <- matrix(NA, nrow = length(selUnits), ncol = length(selUnits))
   rownames(mat) <- colnames(data)[selUnits]
   colnames(mat) <- colnames(data)[selUnits]
@@ -258,8 +258,77 @@ plotSummaryHeatmapDiff <- function(data, selUnits, selCows = 1:nrow(data), title
           main = title,
           symm = TRUE,
           scale = "none", margins = c(5, 5) + 2)
-  
 }
+
+
+plotSummaryHeatmapDiff <- function(data, selUnits, selCows = 1:nrow(data), title = "", dendro = TRUE) {
+  mat <- matrix(NA, nrow = length(selUnits), ncol = length(selUnits))
+  rownames(mat) <- colnames(data)[selUnits]
+  colnames(mat) <- colnames(data)[selUnits]
+  
+  for (i in 1:length(selUnits))
+    for (j in 1:length(selUnits))
+      mat[i, j] <- getResMW(data, selUnits[i], selUnits[j], selCows)
+  
+  rowV <- NA
+  if (dendro)
+    rowV <- NULL
+  
+  m <- apply(mat, 1, rev)
+  
+  image(t(m), col = c("salmon", "white", "lightblue"), axes = F, main = title, asp = 1)
+  axis(1, at = seq(0, 1, 1 / (ncol(mat) - 1)), colnames(mat), las = 2)
+  axis(2, at = seq(0, 1, 1 / (ncol(mat) - 1)), rev(colnames(mat)), las = 1)
+}
+
+
+
+
+
+
+size <- 4
+tiff(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, ".tiff"), 
+     width = 2 * size * 500, height = 2 * size * 500, res = 600, compression = 'lzw')
+
+dendro <- F
+
+par(mar = c(5 + 1, 4 + 2, 4 + 0, 2 + 0) + 0.1)
+
+for (lact in 0) {
+  for (stage in 0) {
+    print(lact)
+    
+    mat <- matrix(NA, nrow = numUnits, ncol = numUnits)
+    rownames(mat) <- colnames(data)[1:numUnits]
+    colnames(mat) <- colnames(data)[1:numUnits]
+    
+    if (lact == 0 & stage == 0) {
+      selCows <- 1:nrow(data)
+      title <- paste0("All cows", " (n = ", length(selCows), ")")
+    } else if (lact == 0) {
+      selCows <- which(data$stage == sort(unique(data$stage))[stage])
+      title <- paste0("Stage: ", sort(unique(data$stage))[stage], " (n = ", length(selCows), ")")
+    } else if (stage == 0) {
+      selCows <- which(data$lact == sort(unique(data$lact))[lact])
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], " (n = ", length(selCows), ")")
+    } else  {
+      selCows <- which(data$lact == sort(unique(data$lact))[lact] & data$stage == sort(unique(data$stage))[stage])
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], 
+                      " (n = ", length(selCows), ")")
+    }
+    
+    print(length(selCows))
+    print(title)
+    
+    selUnits <- 1:numUnits
+    plotSummaryHeatmapDiff(data, selUnits, selCows, title = paste0(title), dendro = dendro)
+  }
+}
+
+dev.off()
+
+
+
 
 
 
@@ -274,12 +343,11 @@ rightAreas <- c("bed5_left", "bed5_right", "bed6_left",
                 "bed6_right", "bed3_right", "bed4_right", "bed8")
 
 
-
-pdf(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, " SIDES.pdf"))
+pdf(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, " SIDES.pdf"), width = 16, height = 8)
 
 dendro <- F
 
-par(mfrow = c(1, 2))
+par(mfrow = c(1, 2), mar = c(5 + 1, 4 + 1, 4 + 1, 2 + 1) + 0.1)
 
 for (lact in 0:length(unique(data$lact))) {
   for (stage in 0:length(unique(data$stage))) {
@@ -316,3 +384,173 @@ for (lact in 0:length(unique(data$lact))) {
 }
 
 dev.off()
+
+
+
+
+
+
+
+size <- 4
+tiff(paste0(outputFolder, "/diffHeatmap ", "summary ", farmName, " SIDES.tiff"), 
+     width = 4 * size * 500, height = 2 * size * 500, res = 600, compression = 'lzw')
+
+dendro <- F
+
+par(mfrow = c(1, 2), mar = c(5 + 1, 4 + 1, 4 + 0, 2 + 0) + 0.1)
+
+for (lact in 0) {
+  for (stage in 0) {
+    print(lact)
+    
+    mat <- matrix(NA, nrow = numUnits, ncol = numUnits)
+    rownames(mat) <- colnames(data)[1:numUnits]
+    colnames(mat) <- colnames(data)[1:numUnits]
+    
+    if (lact == 0 & stage == 0) {
+      selCows <- 1:nrow(data)
+      title <- paste0("All cows", " (n = ", length(selCows), ")")
+    } else if (lact == 0) {
+      selCows <- which(data$stage == sort(unique(data$stage))[stage])
+      title <- paste0("Stage: ", sort(unique(data$stage))[stage], " (n = ", length(selCows), ")")
+    } else if (stage == 0) {
+      selCows <- which(data$lact == sort(unique(data$lact))[lact])
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], " (n = ", length(selCows), ")")
+    } else  {
+      selCows <- which(data$lact == sort(unique(data$lact))[lact] & data$stage == sort(unique(data$stage))[stage])
+      title <- paste0("Lact: ", sort(unique(data$lact))[lact], ", stage: ", sort(unique(data$stage))[stage], 
+                      " (n = ", length(selCows), ")")
+    }
+    
+    print(length(selCows))
+    print(title)
+    
+    selUnits <- which(colnames(data) %in% leftAreas) # Lad farm only: left
+    plotSummaryHeatmapDiff(data, selUnits, selCows, title = paste0("Left side of the barn: ", title), dendro = dendro)
+    
+    selUnits <- which(colnames(data) %in% rightAreas) # Lad farm only: right
+    plotSummaryHeatmapDiff(data, selUnits, selCows, title = paste0("Right side of the barn: ", title), dendro = dendro)
+  }
+}
+
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+getPvalMW <- function(data, i, j, selCows) {
+  x <- data[, i]
+  y <- data[, j]
+  
+  sel <- selCows
+  sel <- selCows[which(x[selCows] > 0 & y[selCows] > 0)] # Discard zeros
+  print(paste0(length(which(x[selCows] > 0 & y[selCows] > 0)), "/", length(sel), " used, others excluded as zeros"))
+  
+  if (length(sel) == 0) # Not enough observations
+    return(0)
+  
+  less <- wilcox.test(x[sel], y[sel], alternative = "less", paired = TRUE)
+  gr <- wilcox.test(x[sel], y[sel], alternative = "greater", paired = TRUE)
+  
+  return(less$p.value)
+}
+
+
+
+saveSortedDiff <- function(data, selUnits, selCows = 1:nrow(data), title = "", dendro = TRUE) {
+  mat <- matrix(NA, nrow = length(selUnits), ncol = length(selUnits))
+  rownames(mat) <- colnames(data)[selUnits]
+  colnames(mat) <- colnames(data)[selUnits]
+  
+  for (i in 1:length(selUnits))
+    for (j in 1:length(selUnits))
+      mat[i, j] <- getPvalMW(data, selUnits[i], selUnits[j], selCows)
+  
+  # rowV <- NA
+  # if (dendro)
+  #   rowV <- NULL
+  # 
+  # m <- apply(mat, 1, rev)
+  # 
+  # image(t(m), col = c("salmon", "white", "lightblue"), axes = F, main = title, asp = 1)
+  # axis(1, at = seq(0, 1, 1 / (ncol(mat) - 1)), colnames(mat), las = 2)
+  # axis(2, at = seq(0, 1, 1 / (ncol(mat) - 1)), rev(colnames(mat)), las = 1)
+  
+  # write.table(mat, fileName, col.names = NA, row.names = T, sep  = ";")
+  # write.csv2(mat, fileName, row.names = T)
+  
+  return(mat)
+}
+
+
+
+SIDES <- FALSE
+
+
+library(xlsx)
+
+fileName <- paste0(outputFolder, "/MW p-values ", farmName, ".xlsx")
+append <- FALSE
+
+par(mfrow = c(1, 2), mar = c(5 + 1, 4 + 1, 4 + 1, 2 + 1) + 0.1)
+
+for (lact in 0:length(unique(data$lact))) {
+  for (stage in 0:length(unique(data$stage))) {
+    print(lact)
+    
+    mat <- matrix(NA, nrow = numUnits, ncol = numUnits)
+    rownames(mat) <- colnames(data)[1:numUnits]
+    colnames(mat) <- colnames(data)[1:numUnits]
+    
+    if (lact == 0 & stage == 0) {
+      selCows <- 1:nrow(data)
+      title <- paste0("All cows", " (n = ", length(selCows), ")")
+    } else if (lact == 0) {
+      selCows <- which(data$stage == sort(unique(data$stage))[stage])
+      title <- paste0("Stage ", sort(unique(data$stage))[stage], " (n = ", length(selCows), ")")
+    } else if (stage == 0) {
+      selCows <- which(data$lact == sort(unique(data$lact))[lact])
+      title <- paste0("Lact ", sort(unique(data$lact))[lact], " (n = ", length(selCows), ")")
+    } else  {
+      selCows <- which(data$lact == sort(unique(data$lact))[lact] & data$stage == sort(unique(data$stage))[stage])
+      title <- paste0("Lact ", sort(unique(data$lact))[lact], ", stage ", sort(unique(data$stage))[stage], 
+                      " (n = ", length(selCows), ")")
+    }
+    
+    print(length(selCows))
+    print(title)
+    
+    
+    if (SIDES) {
+      selUnits <- which(colnames(data) %in% leftAreas) # Lad farm only: left
+      mat <- saveSortedDiff(data, selUnits, selCows, 
+                            title = paste0("Left side of the barn: ", title), dendro = dendro)
+      
+      write.xlsx(mat, file = fileName, sheetName = paste0(title, "_left"), append = append, row.names = T)
+      
+      if (!append)
+        append <- TRUE
+      
+      selUnits <- which(colnames(data) %in% rightAreas) # Lad farm only: right
+      mat <- saveSortedDiff(data, selUnits, selCows, 
+                            title = paste0("Right side of the barn: ", title), dendro = dendro)
+      
+      write.xlsx(mat, file = fileName, sheetName = paste0(title, "_right"), append = append, row.names = T)
+    } else {
+      mat <- saveSortedDiff(data, selUnits, selCows, 
+                            title = title, dendro = dendro)
+      
+      write.xlsx(mat, file = fileName, sheetName = title, append = append, row.names = T)
+      
+      if (!append)
+        append <- TRUE
+    }
+  }
+}
