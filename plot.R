@@ -81,7 +81,7 @@ addPoints <- function(FAdata, id, start = "2019-11-15 01:00:00 CET",
 #' @param ... Additional graphic parameters
 #' @export
 #'
-addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Average hours per day", ...) {
+addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Average hours per day", bLegend = TRUE, ...) {
   maxCub <- 0
   for (i in 1:length(hml))
     if (class(hml[[i]]) == "RasterLayer")
@@ -98,7 +98,7 @@ addCubicleHeatmap <- function(hml, maxHours = 0, factor = 1, legendText = "Avera
         message(paste0("Warning: current maxHours variable is too low, increase it above ", 
                        max(hml[[i]]@data@values * factor)))
   
-  bLegend <- TRUE # Used to plot the legend only once
+  # bLegend <- TRUE # Used to plot the legend only once
   for (i in 1:length(hml))
     if (class(hml[[i]]) == "RasterLayer") { # Do not plot anything if raster is empty
       plot(hml[[i]] * factor, zlim = c(0, maxHours), add = T, 
@@ -147,6 +147,8 @@ plotCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, cols,
   addBarnFeatures(barn)
   
   par(opar)
+  
+  return(sumHML)
 }
 
 

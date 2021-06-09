@@ -8,9 +8,6 @@ source("plot.R") # Load plot methods
 
 source("farmLad.R") # Farm-specific functions
 
-# Read data on barn layout
-barn <- readBarnData("data/barn_Lad.csv")
-
 
 
 
@@ -39,16 +36,13 @@ bRot <- F
 
 # Plot trajectory for a selected cow
 plotBarn(barn, bRot, axes = FALSE, main = ids[15])
-addPoints(FAdata, ids[15], "red", bRot)
+addPoints(FAdata, ids[15], start, end, color = 3, bRot)
+addBarnFeatures(barn)
 
 
-
-# Read data on performance tags
-tags <- read.csv("data/performanceTags_Lad.csv", sep = ";")
 
 # Remove performance tags
-perfTags <- ids[which(!is.na(match(ids, tags$tag_id)))]
-ids <- ids[which(is.na(match(ids, tags$tag_id)))]
+ids <- ids[which(is.na(match(ids, perfTags$tag_id)))]
 
 
 
@@ -147,7 +141,7 @@ pal <- adjustcolor(cm.colors(100), alpha.f = 0.6)
 plotBarn(barn, bRot, axes = F, main = id)
 addPoints(FAdata, id, "red", bRot)
 
-r <- rasterizePoints(FAdata, id, grid, bRot)
+r <- rasterizePoints(FAdata, id, start, end, grid, bRot)
 image(r, add = T, col = pal)
 
 
@@ -187,3 +181,82 @@ plotBarn(barn, bRot = T, bAdd = TRUE) # Add barn wireframe on top
 
 # Standalone heatmap for all cows
 plot(r, axes = F, box = F, main = "All cows")
+
+
+
+
+
+
+
+date <- as.Date("2020-09-20")
+
+
+# Read FA data
+FAdata <- read.FAData(paste0(dataFolder, "/CowDataLad/FA_", 
+                             as.character(as.Date(date, origin = "1970-01-01"), format = "%Y%m%d"), 
+                             "T000000UTC.csv"))
+
+# Print FA data dimensions
+getInfo(FAdata)
+
+# Get the time interval
+timeRange <- getTimeRange(FAdata)
+start <- timeRange[1]
+end <- timeRange[2]
+
+ids <- sort(unique(FAdata$id)) # Get tag IDs
+id <- ids[24]
+
+
+
+
+
+PAdata <- read.PAData(paste0(dataFolder, "/CowDataLad/PA_", as.character(as.Date(date, origin = "1970-01-01"), 
+                                                                         format = "%Y%m%d"), "T000000UTC.csv"))
+
+
+
+
+
+pdf(paste0(outputFolder, "/FA-PA.pdf"), width = 11, height = 6)
+
+opar <- par(mfrow = c(1, 2), mar = c(1,1,1,1))
+
+plotBarn(barn, bRot, axes = FALSE, main = "FA data")
+addPoints(FAdata, id, start, end, color = 3, bRot, cex = 1.2)
+addBarnFeatures(barn)
+
+
+
+# Plot trajectory for a selected cow
+plotBarn(barn, axes = FALSE, bText = FALSE, main = "PA data")
+
+data <- PAdata[which(PAdata$id == id), ]
+
+points(data$x, data$y, pch = 19, col = data$activity + 1, cex = 0.5)
+addBarnFeatures(barn)
+
+legend("bottomright", legend = c("Unknown", "Standing", "Walking", "In cubicle", 
+                                 "At feed", "At drinker", "Out def", "Outside"), 
+       title = "Activity", col = c(0, 1, 2, 3, 4, 5, 998, 999) + 1, pch = 19, bg = NA)
+
+
+par(opar)
+
+dev.off()
+
+
+png(paste0(outputFolder, "/LadMap.png"), width = 600, height = 1000, res = 200)
+
+opar <- par(mar = c(1,1,1,1))
+
+plotBarn(barn, axes = FALSE, bText = FALSE, main = "", xlim = c(0, 3300), ylim = c(2500, 8000))
+
+addCubicleHeatmap(hm, factor = 1 / 9, bLegend = F)
+
+addBarnFeatures(barn, textSize = 0.8)
+
+par(opar)
+
+dev.off()
+

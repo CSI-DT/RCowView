@@ -3,14 +3,14 @@
 
 farmName <- "Wim"
 
-addBarnFeatures <- function(barn) {
+addBarnFeatures <- function(barn, textSize = 0.5) {
   sel <- which(substring(barn$Unit, 1, 4) == "feed")
   rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5))
   
   mid <- (barn$x3[which(barn$Unit == "feedtable1")] + barn$x1[which(barn$Unit == "feedtable1")]) / 2
   # text(mid, 300, "Milking area")
   
-  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Name[-1], cex = 0.5)
+  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Name[-1], cex = textSize)
 }
 
 

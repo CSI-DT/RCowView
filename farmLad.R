@@ -10,13 +10,15 @@ KO_folder <- paste0(dataFolder, "/CowDataLad/KO info")
 DBFileName <- paste0(dataFolder, "/CowDataLad/PA2020.db")
 
 
-addBarnFeatures <- function(barn) {
+addBarnFeatures <- function(barn, textSize = 0.5) {
   mid <- (barn$x3[which(barn$Unit == "bed3")] + barn$x1[which(barn$Unit == "bed3")]) / 2
   
   sel <- which(barn$Unit == "feed")
   rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5))
   
-  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Name[-1], cex = 0.5)
+  
+  for (i in which(barn$Unit != "feed" & barn$Unit != "Base"))
+    text((barn$x1[i] + barn$x3[i]) / 2, (barn$y1[i] + barn$y3[i]) / 2, barn$Name[i], cex = textSize)
   
   
   text(mid, 1300, "Milking area")
@@ -181,7 +183,7 @@ readCowTagMap <- function() {
     colnames(koData)[1] <- "CowID"
     
     koData <- koData[which(koData$Tag != 0), ]
-    koData$From <- rep(KO_dates[i], nrow(koData))
+    koData$From <- rep(KO_dates[i], nrow(koData)) # TODO: use dry-off date instead
     
     cowTagMap <- rbind(cowTagMap, koData)
   }

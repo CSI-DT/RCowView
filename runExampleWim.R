@@ -94,7 +94,7 @@ meanPos$DIM <- sapply(meanPos$tag, function(tag) {
   if (length(sel) == 0)
     return(NA)
   
-  DIM <- as.Date(startDate) - as.Date(cowData$CalvingDate)[sel]
+  DIM <- as.Date(startDate) - as.Date(cowData$CalvingDate)[sel] # TODO: is startDate declared?
   i <- which.min(replace(DIM, DIM < 0, NA))
   
   if (length(i) == 0)

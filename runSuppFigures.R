@@ -8,7 +8,7 @@ source("analysis.R") # Load analysis methods
 source("database.R") # Load database methods
 
 source("farmLad.R") # Farm-specific functions
-source("farmWim.R") # Farm-specific functions
+# source("farmWim.R") # Farm-specific functions
 
 
 if (farmName == "Wim")
@@ -105,8 +105,10 @@ startDate <- "2020-11-02"
 endDate <- "2020-11-10"
 
 
-maxHours <- 24 # Lad: 19.49, Wim: 27.07
-# maxHours <- 28
+maxHours <- 20 # Lad: 19.49, Wim: 27.07
+
+if (farmName == "Wim")
+  maxHours <- 28
 
 selTagByLact <- function(case, active, cowData, date) {
   if (case == 1)
