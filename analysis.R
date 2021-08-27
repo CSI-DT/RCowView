@@ -217,6 +217,7 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
   dates <- as.Date(as.Date(startDate):as.Date(endDate), origin = "1970-01-01")
   
   totalUsageData <- data.frame()
+  totalCowDays <- 0
   
   naTags <- c()
   naDays <- c()
@@ -275,6 +276,9 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
     
     dailyUsageData <- dailyUsageData[which(!is.na(dailyUsageData$Cow)), -1]
     
+    
+    totalCowDays <- totalCowDays + nrow(dailyUsageData)
+    
     if (nrow(totalUsageData) == 0) {
       totalUsageData <- dailyUsageData
       totalUsageData$days <- rep(1, nrow(totalUsageData))
@@ -308,4 +312,6 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
   write.table(data.frame(MissingTags = naTags, Day = as.Date(naDays, origin = "1970-01-01")), 
               paste0(cacheFolder, "/non-matchedTags ", farmName, " ", startDate, " - ", endDate, ".csv"), 
               row.names = F, sep  = ";")
+  
+  print(paste0("Total number of cow-days: ", totalCowDays))
 }
