@@ -8,7 +8,7 @@ source("analysis.R") # Load analysis methods
 source("database.R") # Load database methods
 
 source("farmLad.R") # Farm-specific functions
-# source("farmWim.R") # Farm-specific functions
+source("farmWim.R") # Farm-specific functions
 
 
 if (farmName == "Wim")
@@ -124,7 +124,8 @@ selTagByLact <- function(case, active, cowData, date) {
 # Figure for all cows and cows in lact 1, 2, 3+ (S1)
 tiff(paste0(outputFolder, "/cubicleHeatmapSupp-All and by lact ",
                        farmName, " ", startDate, " - ", endDate, ".tiff"),
-     width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
+     # width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
+     width = 800 * 4 * 2, height = 800 * 4 * 2, res = 300 * 2, compression = 'lzw')
 
 makeSummaryPlot(startDate, endDate,
                 maxHours = maxHours,
@@ -156,7 +157,8 @@ selTagByEarlyLactDIM <- function(case, active, cowData, date) {
 for (lact in 1:2) {
   tiff(paste0(outputFolder, "/cubicleHeatmapSupp-Lact", lact, " ", 
                          farmName, " ", startDate, " - ", endDate, ".tiff"),
-       width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
+       # width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
+        width = 800 * 4 * 2, height = 800 * 4 * 2, res = 300 * 2, compression = 'lzw')
   
   makeSummaryPlot(startDate, endDate,  
                   selTagFUN = selTagByEarlyLactDIM, 
@@ -175,7 +177,8 @@ for (lact in 1:2) {
 for (lact in c(3)) {
   tiff(paste0(outputFolder, "/cubicleHeatmapSupp-Lact", lact, "+", " ", 
                          farmName, " ", startDate, " - ", endDate, ".tiff"),
-       width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
+       # width = 800 * 4, height = 800 * 4, res = 300, compression = 'lzw')
+       width = 800 * 4 * 2, height = 800 * 4 * 2, res = 300 * 2, compression = 'lzw')
   
   makeSummaryPlot(startDate, endDate,
                   selTagFUN = selTagByEarlyLactDIM, 

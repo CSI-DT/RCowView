@@ -29,7 +29,8 @@ tiff(paste0(outputFolder, "/Fig1 - cubicleHeatmap ", farmName, " ", startDate, "
      width = 800 * 4, height = 800 * 6, res = 600, compression = 'lzw')
 
 plotCubicleUsageHeatmap(startDate, endDate, barn, beds, bedRows, bedCols, ylim = ylim, 
-                        cacheFile = paste0(cacheFolder, "/cubicleHeatmap ", farmName, " ", startDate, " - ", endDate, ".rds"))
+                        cacheFile = paste0(cacheFolder, "/cubicleHeatmap ", farmName, " ", 
+                                           startDate, " - ", endDate, ".rds"))
 # mtext(paste0("Cubicle usage between ", startDate, " and ", endDate), side = 3, line = 2) # Add title
 
 dev.off()

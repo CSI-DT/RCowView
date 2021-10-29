@@ -6,8 +6,8 @@ source("data.R") # Load data methods
 source("plot.R") # Load plot methods
 source("analysis.R") # Load analysis methods
 
-source("farmWim.R") # Farm-specific functions
-# source("farmLad.R") # Farm-specific functions
+source("farmLad.R") # Farm-specific functions
+# source("farmWim.R") # Farm-specific functions
 
 
 startDate <- "2020-11-02"
@@ -287,7 +287,8 @@ plotBarnTime <- function(sel, upperLimit = NA, ...) {
 
 
 tiff(paste0(outputFolder, "/Fig2 - areaUsageSummary ", farmName, ".tiff"), 
-     width = 2 * size * 500, height = 3 * size * 500, res = 600, compression = 'lzw')
+     # width = 2 * size * 500, height = 3 * size * 500, res = 600, compression = 'lzw')
+    width = 2 * size * 500 * 2, height = 3 * size * 500 * 2, res = 600 * 2, compression = 'lzw')
 opar <- par(mfrow = c(3, 3), mar = c(5.1 - 2, 4.1 - 4, 4.1 - 2.5, 2.1 - 2))
 
 upper <- 0.32
@@ -310,7 +311,7 @@ for (i in sort(unique(data$lact))) {
 addColorBandLegend(title = "Average hours per day", pos = c((barn$x3[1] + barn$x1[1]) / 2, 
                                                             # barn$y1[which(barn$Unit == "bed1")] - 700), 
                                                             min(yRange) - 800), 
-                   length = 1500, range = c(0, upper), offsets = c(250, 250), xpd = T, cex = 0.8)
+                   length = 1500, range = c(0, upper), offsets = c(260, 260), xpd = T, cex = 0.9)
 
 par(opar)
 dev.off()
