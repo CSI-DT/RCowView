@@ -189,7 +189,7 @@ calculateCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, 
     tags <- unique(data$tag)
     tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
     
-    tags <- getActiveTags(data, date, cacheFile = paste0(cacheFolder, "\cachedActiveTags_", farmName, ".rds")) # Keep only active tags
+    tags <- getActiveTags(data, date, cacheFile = paste0(cacheFolder, "/cachedActiveTags_", farmName, ".rds")) # Keep only active tags
     
     hml <- getDailyCubicleUsageHeatmap(data, tags, 
                                        barn = barn, 
@@ -233,7 +233,7 @@ saveAreaUsageDataToFile <- function(startDate, endDate, areas) {
     tags <- tags[which(is.na(match(tags, perfTags$tag_string)))] # Remove performance tags
     
     # Keep only active tags
-    tags <- getActiveTags(data, date, cacheFile = paste0(cacheFolder, "\cachedActiveTags_", farmName, ".rds"))
+    tags <- getActiveTags(data, date, cacheFile = paste0(cacheFolder, "/cachedActiveTags_", farmName, ".rds"))
     
     dailyUsageData <- getDailyAreaUsageData(data, tags, areas)
     
