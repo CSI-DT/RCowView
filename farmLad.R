@@ -10,37 +10,51 @@ KO_folder <- paste0(dataFolder, "/CowDataLad/KO info")
 DBFileName <- paste0(dataFolder, "/CowDataLad/PA2020.db")
 
 
-addBarnFeatures <- function(barn, textSize = 0.5) {
+addBarnFeatures <- function(barn, textSize = 0.75) {
   mid <- (barn$x3[which(barn$Unit == "bed3")] + barn$x1[which(barn$Unit == "bed3")]) / 2
   
   sel <- which(barn$Unit == "feed")
-  rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5))
+  rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5),
+       border = "black")
   
   
-  for (i in which(barn$Unit != "feed" & barn$Unit != "Base"))
-    text((barn$x1[i] + barn$x3[i]) / 2, (barn$y1[i] + barn$y3[i]) / 2, barn$Name[i], cex = textSize)
+  for (i in which(#barn$Unit != "feed" & 
+                  barn$Unit != "Base")) {
+    srt <- 90
+    
+    if (barn$Name[i] == "bed7" | barn$Name[i] == "bed8")
+      srt <- 0
+    
+    if (barn$Name[i] %in% c("1", "2", "3", "4", "5", "6", "7", "8")) {
+      srt <- 0
+      text((barn$x1[i] + barn$x3[i]) / 2, (barn$y1[i] + barn$y3[i]) / 2, barn$Name[i], cex = textSize * 2, 
+           srt = srt,
+           col = adjustcolor("black", 0.7))
+    } else
+      text((barn$x1[i] + barn$x3[i]) / 2, (barn$y1[i] + barn$y3[i]) / 2, barn$Name[i], cex = textSize, srt = srt)
+  }
   
   
   text(mid, 1300, "Milking area")
   
-  segments(x0 = mid, y0 = barn$y1[which(barn$Unit == "bed3")], y1 = barn$y3[which(barn$Unit == "Base")])
+  segments(x0 = mid, y0 = barn$y1[which(barn$Unit == "bed3")], y1 = barn$y3[which(barn$Unit == "Base")], col = "black")
   
   segments(x0 = mid, y0 = barn$y1[which(barn$Unit == "bed3")], 
-           x1 = barn$x3[which(barn$Unit == "robotbed1")], y1 = barn$y3[which(barn$Unit == "robotbed1")])
+           x1 = barn$x3[which(barn$Unit == "robotbed1")], y1 = barn$y3[which(barn$Unit == "robotbed1")], col = "black")
   segments(x0 = mid, y0 = barn$y1[which(barn$Unit == "bed3")], 
-           x1 = barn$x1[which(barn$Unit == "robotbed2")], y1 = barn$y3[which(barn$Unit == "robotbed2")])
+           x1 = barn$x1[which(barn$Unit == "robotbed2")], y1 = barn$y3[which(barn$Unit == "robotbed2")], col = "black")
   
   
   segments(x0 = barn$x3[which(barn$Unit == "feed")[1]], y0 = barn$y3[which(barn$Unit == "robotbed1")], 
-           x1 = barn$x1[which(barn$Unit == "robotbed1")])
+           x1 = barn$x1[which(barn$Unit == "robotbed1")], col = "black")
   
   segments(x0 = barn$x1[which(barn$Unit == "feed")[2]], y0 = barn$y3[which(barn$Unit == "robotbed2")], 
-           x1 = barn$x3[which(barn$Unit == "robotbed2")])
+           x1 = barn$x3[which(barn$Unit == "robotbed2")], col = "black")
   
   
   for (unit in c("bed1", "bed2", "bed5", "bed6")) {
     segments(x0 = ((barn$x1 + barn$x3) / 2)[which(barn$Unit == unit)], 
-             y0 = barn$y1[which(barn$Unit == unit)], y1 = barn$y3[which(barn$Unit == unit)])
+             y0 = barn$y1[which(barn$Unit == unit)], y1 = barn$y3[which(barn$Unit == unit)], col = "black")
   }
 }
 
@@ -71,6 +85,17 @@ readBarnData <- function(file) {
   barn$Name[which(barn$Unit == "deepstraw2")] <- ""
   barn$Name[which(barn$Unit == "bed8")] <- ""
   barn$Name[which(barn$Unit == "bed9")] <- ""
+  
+  
+  # Use numbers without "bed"
+  barn$Name[which(barn$Unit == "bed1")] <- "1"
+  barn$Name[which(barn$Unit == "bed2")] <- "2"
+  barn$Name[which(barn$Unit == "bed3")] <- "3"
+  barn$Name[which(barn$Unit == "bed4")] <- "4"
+  barn$Name[which(barn$Unit == "bed5")] <- "5"
+  barn$Name[which(barn$Unit == "bed6")] <- "6"
+  barn$Name[which(barn$Unit == "robotbed1")] <- "7"
+  barn$Name[which(barn$Unit == "mbed2")] <- "8"
   
   return(barn)
 }

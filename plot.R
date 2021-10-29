@@ -19,7 +19,7 @@ plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, bText = FALSE, ...) {
     
     rect(barn$x1[1], barn$y1[1], barn$x3[1], barn$y3[1], col = "gray90") # Base
     
-    rect(barn$x1[-1], barn$y1[-1], barn$x3[-1], barn$y3[-1]) #  Units
+    rect(barn$x1[-1], barn$y1[-1], barn$x3[-1], barn$y3[-1], border = "black") #  Units
     
     if (bText)
       text((barn$x1 + barn$x3) / 2, (barn$y1 + barn$y3) / 2, barn$Unit, cex = 0.5)
@@ -31,7 +31,7 @@ plotBarn <- function(barn, bRotated = FALSE, bAdd = FALSE, bText = FALSE, ...) {
            asp = 1, cex = 0, xlab = "", ylab = "", ...)
     
     rect(barn$y1[1], -barn$x1[1], barn$y3[1], -barn$x3[1], col = "gray90") # Base
-    rect(barn$y1[-1], -barn$x1[-1], barn$y3[-1], -barn$x3[-1]) # Units
+    rect(barn$y1[-1], -barn$x1[-1], barn$y3[-1], -barn$x3[-1], border = "black") # Units
     
     if (bText)
       text((barn$y1 + barn$y3) / 2, -(barn$x1 + barn$x3) / 2, barn$Unit, cex = 0.5)
@@ -154,7 +154,7 @@ plotCubicleUsageHeatmap <- function(startDate, endDate, barn, units, rows, cols,
 
 
 addColorBandLegend <- function(title = "", colors = hcl.colors(12, "YlOrRd", rev = TRUE), k = 100, 
-                               lwd = 7,
+                               thick = 7,
                                pos = c(0, 0), length = 10, range = c(0, 1), offsets = c(1, 1), ...) {
   palette <- colorRampPalette(colors)
   palette <- palette(k)
@@ -162,7 +162,7 @@ addColorBandLegend <- function(title = "", colors = hcl.colors(12, "YlOrRd", rev
   for (i in 1:(k + 1))
     lines(seq(pos[1] - length / 2, pos[1] + length / 2, by = length / k)[c(i, i+1)], 
           rep(pos[2], k + 1)[c(i, i + 1)], 
-          col = palette[i], lend = "butt", lwd = lwd, ...)
+          col = palette[i], lend = "butt", lwd = thick, ...)
   
   text(pos[1] - length / 2, pos[2] - offsets[1], signif(range[1], 3), adj = 0.5, ...)
   # text(pos[1], pos[2] - offsets[1], signif(floor((range[1] + range[2]) / 2), 3), adj = 0.5, ...)

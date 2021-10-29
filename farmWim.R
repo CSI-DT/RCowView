@@ -3,14 +3,33 @@
 
 farmName <- "Wim"
 
-addBarnFeatures <- function(barn, textSize = 0.5) {
+addBarnFeatures <- function(barn, textSize = 0.7) {
   sel <- which(substring(barn$Unit, 1, 4) == "feed")
-  rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5))
+  rect(barn$x1[sel], barn$y1[sel], barn$x3[sel], barn$y3[sel], col = adjustcolor("yellowgreen", alpha.f = 0.5), 
+       border = "black")
   
   mid <- (barn$x3[which(barn$Unit == "feedtable1")] + barn$x1[which(barn$Unit == "feedtable1")]) / 2
   # text(mid, 300, "Milking area")
   
-  text((barn$x1[-1] + barn$x3[-1]) / 2, (barn$y1[-1] + barn$y3[-1]) / 2, barn$Name[-1], cex = textSize)
+  sel <- which(barn$Unit == "feedtable2" | barn$Unit == "robot")
+  text((barn$x1[sel] + barn$x3[sel]) / 2, (barn$y1[sel] + barn$y3[sel]) / 2, barn$Name[sel], 
+       cex = 0.75, srt = 0)
+  
+  sel <- which(barn$Unit == "bedinsemarea" | barn$Unit == "feedboxes")
+  text((barn$x1[sel] + barn$x3[sel]) / 2, (barn$y1[sel] + barn$y3[sel]) / 2, barn$Name[sel], 
+       # cex = 0.35, 
+       cex = 0.75, 
+       srt = 0)
+  
+  # sel <- setdiff(2:nrow(barn), which(barn$Unit == "bedinsemarea" | barn$Unit == "feedboxes" | 
+  #                                      barn$Unit == "feedtable2" | barn$Unit == "robot"))
+  sel <- which(barn$Unit == "feedtable1")
+  text((barn$x1[sel] + barn$x3[sel]) / 2, (barn$y1[sel] + barn$y3[sel]) / 2, barn$Name[sel], 
+       cex = textSize * 1.5, srt = 90)
+  
+  sel <- which(barn$Unit %in% c("bed1", "bed2", "bed3", "bed4", "bed5", "bed6", "bed7"))
+  text((barn$x1[sel] + barn$x3[sel]) / 2, (barn$y1[sel] + barn$y3[sel]) / 2, barn$Name[sel], 
+       cex = textSize * 2, srt = 0, col = adjustcolor("black", 0.7))
 }
 
 
@@ -46,6 +65,20 @@ readBarnData <- function(file) {
   barn$Name[which(barn$Unit == "feedboxes")] <- "Concentrate"
   barn$Name[which(barn$Unit == "feedtable1")] <- "Feed table"
   barn$Name[which(barn$Unit == "feedtable2")] <- "Feed table"
+  
+  # Use numbers without "bed"
+  barn$Name[which(barn$Unit == "bed1")] <- "1"
+  barn$Name[which(barn$Unit == "bed2")] <- "2"
+  barn$Name[which(barn$Unit == "bed3")] <- "3"
+  barn$Name[which(barn$Unit == "bed4")] <- "4"
+  barn$Name[which(barn$Unit == "bed5")] <- "5"
+  barn$Name[which(barn$Unit == "bed6")] <- "6"
+  barn$Name[which(barn$Unit == "bed7")] <- "7"
+  
+  
+  # Short names
+  barn$Name[which(barn$Unit == "bedinsemarea")] <- "Treat."
+  barn$Name[which(barn$Unit == "feedboxes")] <- "Conc."
   
   return(barn)
 }
